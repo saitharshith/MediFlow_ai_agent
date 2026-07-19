@@ -1,4 +1,30 @@
 {
+  "schemaVersion": 2,
+  "createdAt": "2026-07-19T01:54:09.849Z",
+  "updatedAt": "2026-07-19T05:20:03.544Z",
+  "phases": {
+    "prd": {
+      "updatedAt": "2026-07-19T04:32:03.537Z",
+      "committed": true
+    },
+    "persona": {
+      "updatedAt": "2026-07-19T04:32:05.253Z",
+      "committed": true
+    },
+    "brand-guided": {
+      "updatedAt": "2026-07-19T05:20:03.544Z",
+      "committed": true
+    },
+    "stack": {
+      "updatedAt": "2026-07-19T04:33:11.466Z",
+      "committed": true
+    },
+    "apis": {
+      "updatedAt": "2026-07-19T04:33:37.675Z",
+      "committed": true
+    }
+  },
+  "settings": {},
   "boundProjectId": "ba05d0c922014634947ee303650e711a",
   "boundProjectName": "MediFlow_ai_agent"
 }

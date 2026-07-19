@@ -1,0 +1,28 @@
+# Product Requirement Document: MediFlow
+
+## Product Name
+MediFlow
+
+## Summary
+An AI-powered healthcare navigation and patient care coordination agent designed to eliminate fragmented care, organize patient journeys, and assist both patients and doctors while maintaining transparency and accountability.
+
+## Target Users
+*   **Patient:** Needs to manage medical documents, view their care timeline, schedule appointments, and receive simple, multilingual explanations of their health data.
+*   **Doctor:** Needs access to a rapid, highly accurate AI-generated summary of a patient's history before consultations, backed by verifiable source documents.
+*   **Hospital Administrator:** Needs aggregate, hospital-level analytics on operational efficiency and patient compliance.
+
+## Core Capabilities (Scope)
+1.  **Document Ingestion:** Allow patients to upload prescriptions, diagnostic reports, discharge summaries, and medical history.
+2.  **AI Extraction & Timeline:** Extract structured information from medical documents using OCR/AI to build a longitudinal patient timeline showing consultations, medications, tests, and treatments.
+3.  **Conflict & Gap Detection:** Detect duplicate medications, conflicting prescriptions, and missed follow-up appointments.
+4.  **Triage & Routing:** Recommend the appropriate specialist or department based on symptoms and medical history.
+5.  **Smart Scheduling:** Help patients schedule appointments based on doctor availability and urgency.
+6.  **Notification Engine:** Send personalized reminders for medications, vaccinations, diagnostic tests, and follow-up visits.
+7.  **Multilingual Translation:** Provide multilingual explanations of prescriptions and medical terminology in simple language.
+8.  **Facility Locator:** Help patients locate nearby diagnostic centers, pharmacies, and emergency facilities.
+9.  **Patient Dashboard:** Generate a personalized treatment journey dashboard showing: completed consultations, pending appointments, active medications, upcoming follow-ups, and diagnostic history.
+10. **Doctor Clinical Summary:** Allow doctors to access an AI-generated summary of patient history before consultations.
+11. **Hospital Analytics:** Generate hospital-level analytics showing: missed follow-up rates, appointment bottlenecks, patient compliance, and average treatment timelines.
+
+## Non-Goals
+*   MediFlow is NOT a diagnostic engine. It does not independently diagnose diseases or prescribe new medications without doctor intervention.

@@ -1,0 +1,115 @@
+{
+  "raw_text": "# Product Requirement Document: MediFlow\n\n## Product Name\nMediFlow\n\n## Summary\nAn AI-powered healthcare navigation and patient care coordination agent designed to eliminate fragmented care, organize patient journeys, and assist both patients and doctors while maintaining transparency and accountability.\n\n## Target Users\n*   **Patient:** Needs to manage medical documents, view their care timeline, schedule appointments, and receive simple, multilingual explanations of their health data.\n*   **Doctor:** Needs access to a rapid, highly accurate AI-generated summary of a patient's history before consultations, backed by verifiable source documents.\n*   **Hospital Administrator:** Needs aggregate, hospital-level analytics on operational efficiency and patient compliance.\n\n## Core Capabilities (Scope)\n1.  **Document Ingestion:** Allow patients to upload prescriptions, diagnostic reports, discharge summaries, and medical history.\n2.  **AI Extraction & Timeline:** Extract structured information from medical documents using OCR/AI to build a longitudinal patient timeline showing consultations, medications, tests, and treatments.\n3.  **Conflict & Gap Detection:** Detect duplicate medications, conflicting prescriptions, and missed follow-up appointments.\n4.  **Triage & Routing:** Recommend the appropriate specialist or department based on symptoms and medical history.\n5.  **Smart Scheduling:** Help patients schedule appointments based on doctor availability and urgency.\n6.  **Notification Engine:** Send personalized reminders for medications, vaccinations, diagnostic tests, and follow-up visits.\n7.  **Multilingual Translation:** Provide multilingual explanations of prescriptions and medical terminology in simple language.\n8.  **Facility Locator:** Help patients locate nearby diagnostic centers, pharmacies, and emergency facilities.\n9.  **Patient Dashboard:** Generate a personalized treatment journey dashboard showing: completed consultations, pending appointments, active medications, upcoming follow-ups, and diagnostic history.\n10. **Doctor Clinical Summary:** Allow doctors to access an AI-generated summary of patient history before consultations.\n11. **Hospital Analytics:** Generate hospital-level analytics showing: missed follow-up rates, appointment bottlenecks, patient compliance, and average treatment timelines.\n\n## Non-Goals\n*   MediFlow is NOT a diagnostic engine. It does not independently diagnose diseases or prescribe new medications without doctor intervention.",
+  "product_name": "MediFlow",
+  "one_line_summary": "AI-powered healthcare coordination platform that unifies fragmented patient records, provides clinical audibility, and proactively manages care gaps across providers.",
+  "target_users": [
+    "Patients managing their health across multiple providers",
+    "Doctors seeking rapid, auditable medical histories",
+    "Hospital administrators monitoring compliance and care bottlenecks"
+  ],
+  "core_capabilities": [
+    "Upload and parse multimodal medical documents (text, images, prescriptions, discharge summaries)",
+    "Automatically generate chronological timeline of consultations, medications, tests, and treatments",
+    "Identify duplicate or conflicting medications across health networks using semantic embeddings",
+    "Proactively alert patients to missed follow-ups and preventive care gaps",
+    "Bind every AI-generated summary to source text snippets for complete audit trail",
+    "Remember persistent patient constraints (scheduling windows, medication preferences) in conversations",
+    "Translate clinical terminology into plain-language explanations in multiple languages"
+  ],
+  "non_goals": [
+    "Does not provide clinical diagnoses",
+    "Does not alter prescription doses or replace active medical evaluations"
+  ],
+  "pages": [
+    {
+      "name": "Patient Login",
+      "route": "/auth/login",
+      "description": "Authentication entry point for patients and providers",
+      "persona": "Patient, Provider"
+    },
+    {
+      "name": "Patient Sign Up",
+      "route": "/auth/signup",
+      "description": "Patient registration and onboarding flow",
+      "persona": "Patient"
+    },
+    {
+      "name": "Patient Dashboard",
+      "route": "/patient/dashboard",
+      "description": "Central hub showing care timeline, upcoming appointments, care gaps, and document uploads",
+      "persona": "Patient"
+    },
+    {
+      "name": "Care Timeline",
+      "route": "/patient/timeline",
+      "description": "Interactive chronological view of all medical events, consultations, medications, and test results",
+      "persona": "Patient"
+    },
+    {
+      "name": "Document Upload",
+      "route": "/patient/documents/upload",
+      "description": "Multimodal ingestion interface for prescriptions, summaries, lab reports, and medical images",
+      "persona": "Patient"
+    },
+    {
+      "name": "Document Library",
+      "route": "/patient/documents",
+      "description": "Organized repository of all uploaded and parsed medical documents with extraction metadata",
+      "persona": "Patient"
+    },
+    {
+      "name": "Care Gaps & Alerts",
+      "route": "/patient/care-gaps",
+      "description": "View missed follow-ups, recommended checkups, and proactive scheduling suggestions",
+      "persona": "Patient"
+    },
+    {
+      "name": "Patient AI Chatbot",
+      "route": "/patient/chat",
+      "description": "Conversational agent providing plain-language translations of medical records and scheduling assistance",
+      "persona": "Patient"
+    },
+    {
+      "name": "Provider Dashboard",
+      "route": "/provider/dashboard",
+      "description": "Rapid access to patient medical histories with audit ledger and source traceability",
+      "persona": "Provider"
+    },
+    {
+      "name": "Patient Lookup",
+      "route": "/provider/patients",
+      "description": "Search and retrieve patient records with AI-generated summaries and semantic conflict detection",
+      "persona": "Provider"
+    },
+    {
+      "name": "Patient Record Detail",
+      "route": "/provider/patients/:id",
+      "description": "Comprehensive patient view with annotated timeline, medication reconciliation, and XAI source ledger",
+      "persona": "Provider"
+    },
+    {
+      "name": "Admin Analytics Dashboard",
+      "route": "/admin/dashboard",
+      "description": "Aggregate metrics on appointment compliance, care gaps, and system performance",
+      "persona": "Hospital Administrator"
+    },
+    {
+      "name": "Compliance Reports",
+      "route": "/admin/compliance",
+      "description": "Detailed reporting on follow-up adherence, missed care gaps, and network bottlenecks",
+      "persona": "Hospital Administrator"
+    },
+    {
+      "name": "User Management",
+      "route": "/admin/users",
+      "description": "Admin controls for provider and patient account management and role assignment",
+      "persona": "Hospital Administrator"
+    },
+    {
+      "name": "Settings",
+      "route": "/settings",
+      "description": "User profile, language preference, scheduling constraints, and notification preferences",
+      "persona": "Patient, Provider"
+    }
+  ]
+}

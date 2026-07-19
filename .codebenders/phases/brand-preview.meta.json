@@ -1,0 +1,15 @@
+{
+  "prdHash": "9cc76163806f0d24e9d79b59f1885883617e46f3",
+  "generatedAt": "2026-07-19T05:20:03.605Z",
+  "agent_type": "brand-preview-html",
+  "designSpec": {
+    "layout_archetype": "marketing_hero_with_feature_grid",
+    "nav_pattern": "sticky_header_with_horizontal_links",
+    "surface": "clean_minimal_gradient_backgrounds",
+    "card_treatment": "bordered_elevated_hover_lift",
+    "density": "spacious_breathing_room",
+    "elevation": "subtle_shadows_and_layering",
+    "radius_language": "consistent_8px_rounded_corners",
+    "signature_motifs": "gradient_primary_secondary_accent_health_icons"
+  }
+}

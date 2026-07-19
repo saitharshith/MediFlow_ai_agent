@@ -1,0 +1,29 @@
+{
+  "frontend": {
+    "framework": "Next.js",
+    "language": "TypeScript",
+    "version": ""
+  },
+  "backend": {
+    "framework": "FastAPI",
+    "language": "Python",
+    "version": "",
+    "mode": "mock"
+  },
+  "database": {
+    "system": "PostgreSQL",
+    "orm": "Prisma",
+    "version": "",
+    "connection": {
+      "hasSecret": true,
+      "kind": "fields",
+      "displayHint": "elgue1.h.filess.io:5432/patient_database_zuluborder"
+    }
+  },
+  "package_manager": "pnpm",
+  "testing": {
+    "unit": "pytest",
+    "e2e": "playwright"
+  },
+  "source_files": []
+}

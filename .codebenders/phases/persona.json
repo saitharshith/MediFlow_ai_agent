@@ -1,0 +1,34 @@
+{
+  "personas": [
+    {
+      "name": "Patient",
+      "short_description": "Manages medical records, views care timeline, schedules appointments, receives reminders and plain-language health explanations.",
+      "key_responsibilities": [
+        "Ingest and extract structured data from medical documents via OCR/AI",
+        "Build longitudinal patient timelines from prescriptions, tests, consultations, and treatments",
+        "Schedule appointments based on doctor availability and urgency",
+        "Send personalized reminders for medications, vaccinations, tests, and follow-ups",
+        "Provide multilingual plain-language explanations of prescriptions and medical terms",
+        "Generate personalized treatment journey dashboard for patients"
+      ]
+    },
+    {
+      "name": "Doctor",
+      "short_description": "Reviews AI-summarized patient history with source traceability before consultations; detects care gaps and conflict risks.",
+      "key_responsibilities": [
+        "Detect duplicate medications, conflicting prescriptions, and missed follow-ups",
+        "Recommend appropriate specialists based on symptoms and medical history",
+        "Deliver AI-summarized patient history with source traceability to doctors"
+      ]
+    },
+    {
+      "name": "Hospital Administrator",
+      "short_description": "Tracks hospital-wide operational efficiency, compliance rates, appointment bottlenecks, and patient care timeline metrics.",
+      "key_responsibilities": [
+        "Analyze hospital-wide metrics on compliance, bottlenecks, and care timelines",
+        "Detect duplicate medications, conflicting prescriptions, and missed follow-ups",
+        "Send personalized reminders for medications, vaccinations, tests, and follow-ups"
+      ]
+    }
+  ]
+}
