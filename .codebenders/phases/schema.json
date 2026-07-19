@@ -1,0 +1,324 @@
+{
+  "orm": "Prisma",
+  "models": [
+    {
+      "name": "patients",
+      "fields": [
+        {
+          "name": "id",
+          "type": "uuid"
+        },
+        {
+          "name": "created_at",
+          "type": "timestamptz"
+        }
+      ]
+    },
+    {
+      "name": "documents",
+      "fields": [
+        {
+          "name": "id",
+          "type": "uuid"
+        },
+        {
+          "name": "created_at",
+          "type": "timestamptz"
+        },
+        {
+          "name": "title",
+          "type": "varchar(255)"
+        },
+        {
+          "name": "content",
+          "type": "text"
+        },
+        {
+          "name": "document_type",
+          "type": "varchar(50)"
+        },
+        {
+          "name": "status",
+          "type": "varchar(50)"
+        },
+        {
+          "name": "author_id",
+          "type": "bigint"
+        },
+        {
+          "name": "file_path",
+          "type": "varchar(500)"
+        },
+        {
+          "name": "version",
+          "type": "int"
+        },
+        {
+          "name": "updated_at",
+          "type": "timestamp"
+        }
+      ]
+    },
+    {
+      "name": "extracted_facts",
+      "fields": [
+        {
+          "name": "id",
+          "type": "uuid"
+        },
+        {
+          "name": "created_at",
+          "type": "timestamptz"
+        },
+        {
+          "name": "content",
+          "type": "text"
+        },
+        {
+          "name": "source_document_id",
+          "type": "uuid"
+        },
+        {
+          "name": "fact_type",
+          "type": "varchar(100)"
+        },
+        {
+          "name": "confidence_score",
+          "type": "decimal(3,2)"
+        },
+        {
+          "name": "extraction_method",
+          "type": "varchar(100)"
+        },
+        {
+          "name": "verified",
+          "type": "boolean"
+        },
+        {
+          "name": "metadata",
+          "type": "jsonb"
+        }
+      ]
+    },
+    {
+      "name": "medications",
+      "fields": [
+        {
+          "name": "id",
+          "type": "uuid"
+        },
+        {
+          "name": "created_at",
+          "type": "timestamptz"
+        }
+      ]
+    },
+    {
+      "name": "appointments",
+      "fields": [
+        {
+          "name": "id",
+          "type": "uuid"
+        },
+        {
+          "name": "created_at",
+          "type": "timestamptz"
+        }
+      ]
+    },
+    {
+      "name": "flags",
+      "fields": [
+        {
+          "name": "id",
+          "type": "uuid"
+        },
+        {
+          "name": "created_at",
+          "type": "timestamptz"
+        },
+        {
+          "name": "key",
+          "type": "varchar(255)"
+        },
+        {
+          "name": "enabled",
+          "type": "boolean"
+        },
+        {
+          "name": "description",
+          "type": "text"
+        },
+        {
+          "name": "environment",
+          "type": "varchar(50)"
+        },
+        {
+          "name": "updated_at",
+          "type": "timestamp"
+        }
+      ]
+    },
+    {
+      "name": "access_logs",
+      "fields": [
+        {
+          "name": "id",
+          "type": "uuid"
+        },
+        {
+          "name": "created_at",
+          "type": "timestamptz"
+        },
+        {
+          "name": "user_id",
+          "type": "bigint"
+        },
+        {
+          "name": "resource",
+          "type": "varchar(255)"
+        },
+        {
+          "name": "action",
+          "type": "varchar(50)"
+        },
+        {
+          "name": "ip_address",
+          "type": "varchar(45)"
+        },
+        {
+          "name": "user_agent",
+          "type": "text"
+        },
+        {
+          "name": "status_code",
+          "type": "int"
+        },
+        {
+          "name": "timestamp",
+          "type": "timestamp"
+        }
+      ]
+    },
+    {
+      "name": "drug_interactions",
+      "fields": [
+        {
+          "name": "id",
+          "type": "uuid"
+        },
+        {
+          "name": "created_at",
+          "type": "timestamptz"
+        },
+        {
+          "name": "drug_a_id",
+          "type": "int"
+        },
+        {
+          "name": "drug_b_id",
+          "type": "int"
+        },
+        {
+          "name": "interaction_type",
+          "type": "varchar(50)"
+        },
+        {
+          "name": "severity",
+          "type": "enum('mild','moderate','severe')"
+        },
+        {
+          "name": "description",
+          "type": "text"
+        },
+        {
+          "name": "mechanism",
+          "type": "text"
+        },
+        {
+          "name": "management",
+          "type": "text"
+        },
+        {
+          "name": "evidence_level",
+          "type": "varchar(50)"
+        }
+      ]
+    },
+    {
+      "name": "doctors",
+      "fields": [
+        {
+          "name": "id",
+          "type": "uuid"
+        },
+        {
+          "name": "created_at",
+          "type": "timestamptz"
+        },
+        {
+          "name": "first_name",
+          "type": "varchar(100)"
+        },
+        {
+          "name": "last_name",
+          "type": "varchar(100)"
+        },
+        {
+          "name": "email",
+          "type": "varchar(255)"
+        },
+        {
+          "name": "phone",
+          "type": "varchar(20)"
+        },
+        {
+          "name": "license_number",
+          "type": "varchar(50)"
+        },
+        {
+          "name": "specialization",
+          "type": "varchar(100)"
+        },
+        {
+          "name": "hospital_id",
+          "type": "bigint"
+        },
+        {
+          "name": "years_of_experience",
+          "type": "int"
+        },
+        {
+          "name": "is_active",
+          "type": "boolean"
+        }
+      ]
+    },
+    {
+      "name": "facilities",
+      "fields": [
+        {
+          "name": "id",
+          "type": "uuid"
+        },
+        {
+          "name": "created_at",
+          "type": "timestamptz"
+        }
+      ]
+    },
+    {
+      "name": "otp_sessions",
+      "fields": [
+        {
+          "name": "id",
+          "type": "uuid"
+        },
+        {
+          "name": "created_at",
+          "type": "timestamptz"
+        }
+      ]
+    }
+  ]
+}

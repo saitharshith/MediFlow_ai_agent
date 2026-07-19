@@ -7,8 +7,7 @@
   "backend": {
     "framework": "FastAPI",
     "language": "Python",
-    "version": "",
-    "mode": "mock"
+    "version": ""
   },
   "database": {
     "system": "PostgreSQL",
@@ -17,12 +16,12 @@
     "connection": {
       "hasSecret": true,
       "kind": "fields",
-      "displayHint": "elgue1.h.filess.io:5432/patient_database_zuluborder"
+      "displayHint": "a54a8l.h.filess.io:5432/Medical_database_holegather"
     }
   },
   "package_manager": "pnpm",
   "testing": {
-    "unit": "pytest",
+    "unit": "vitest",
     "e2e": "playwright"
   },
   "source_files": []

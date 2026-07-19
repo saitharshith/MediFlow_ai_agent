@@ -1,511 +1,520 @@
-<div>
+<div class="mediflow-root">
   <style>
     :root {
-      --c-bg: #fafbfc;
+      --c-bg: #fafafa;
       --c-surface: #ffffff;
-      --c-text: #1a202c;
-      --c-muted: #718096;
-      --c-primary: #2563eb;
-      --c-secondary: #7c3aed;
-      --c-accent: #06b6d4;
+      --c-text: #1a1a1a;
+      --c-muted: #757575;
+      --c-primary: #0066cc;
+      --c-secondary: #6c63ff;
+      --c-accent: #00d4aa;
       --c-success: #10b981;
       --c-danger: #ef4444;
-      --f-body: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
-      --f-heading: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
-      --f-mono: "SF Mono", Monaco, "Cascadia Code", "Roboto Mono", Consolas, "Courier New", monospace;
+      --f-body: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      --f-heading: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      --f-mono: 'SF Mono', Monaco, 'Cascadia Code', monospace;
       --radius: 8px;
       --space: 16px;
     }
+
     * {
       margin: 0;
       padding: 0;
       box-sizing: border-box;
     }
+
     body {
-      background: var(--c-bg);
-      color: var(--c-text);
       font-family: var(--f-body);
+      background-color: var(--c-bg);
+      color: var(--c-text);
       line-height: 1.6;
-      -webkit-font-smoothing: antialiased;
     }
-    .root {
+
+    .mediflow-root {
       display: flex;
       flex-direction: column;
       min-height: 100vh;
+      background-color: var(--c-bg);
     }
-    /* Header */
+
+    /* Header & Nav */
     .header {
-      background: var(--c-surface);
-      border-bottom: 1px solid color-mix(in srgb, var(--c-text) 6%, transparent);
-      padding: calc(var(--space) * 1.25) calc(var(--space) * 2);
-      position: sticky;
-      top: 0;
-      z-index: 100;
-      box-shadow: 0 1px 3px color-mix(in srgb, var(--c-text) 4%, transparent);
-    }
-    .header-inner {
-      max-width: 1280px;
-      margin: 0 auto;
+      background-color: var(--c-surface);
+      border-bottom: 1px solid color-mix(in srgb, var(--c-text) 8%, transparent);
+      padding: calc(var(--space) * 1.5) calc(var(--space) * 2);
       display: flex;
       align-items: center;
       justify-content: space-between;
     }
+
     .logo {
       display: flex;
       align-items: center;
       gap: calc(var(--space) * 0.75);
-      font-size: 20px;
-      font-weight: 700;
-      color: var(--c-primary);
+      font-size: 18px;
+      font-weight: 600;
+      color: var(--c-text);
       text-decoration: none;
     }
-    .logo-mark {
-      width: 32px;
-      height: 32px;
-      background: linear-gradient(135deg, var(--c-primary), var(--c-secondary));
-      border-radius: calc(var(--radius) * 0.8);
+
+    .logo-icon {
+      width: 28px;
+      height: 28px;
       display: flex;
       align-items: center;
       justify-content: center;
-      color: white;
-      font-weight: 800;
-      font-size: 16px;
     }
+
     .nav-links {
       display: flex;
       gap: calc(var(--space) * 2);
       list-style: none;
     }
+
     .nav-links a {
+      font-size: 14px;
       color: var(--c-muted);
       text-decoration: none;
-      font-size: 14px;
-      font-weight: 500;
       transition: color 0.2s;
     }
+
     .nav-links a:hover {
-      color: var(--c-primary);
+      color: var(--c-text);
     }
-    /* Main */
+
+    /* Main Container */
     .main {
       flex: 1;
+      display: flex;
+      flex-direction: column;
     }
-    /* Hero */
+
+    /* Hero Section */
     .hero {
-      background: linear-gradient(135deg, color-mix(in srgb, var(--c-primary) 5%, transparent), color-mix(in srgb, var(--c-secondary) 3%, transparent));
+      background-color: var(--c-surface);
       padding: calc(var(--space) * 5) calc(var(--space) * 2);
       text-align: center;
+      border-bottom: 1px solid color-mix(in srgb, var(--c-text) 6%, transparent);
     }
-    .hero-inner {
+
+    .hero-content {
       max-width: 720px;
       margin: 0 auto;
     }
-    .hero-badge {
-      display: inline-flex;
-      align-items: center;
-      gap: calc(var(--space) * 0.5);
-      background: color-mix(in srgb, var(--c-accent) 10%, transparent);
-      padding: calc(var(--space) * 0.5) calc(var(--space) * 1.25);
-      border-radius: calc(var(--radius) * 2);
-      color: var(--c-accent);
-      font-size: 12px;
-      font-weight: 600;
-      margin-bottom: calc(var(--space) * 2);
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-    }
-    .hero-badge svg {
-      width: 14px;
-      height: 14px;
-    }
-    .hero-title {
+
+    .hero h1 {
       font-size: 48px;
-      font-weight: 800;
+      font-weight: 700;
       line-height: 1.2;
       margin-bottom: calc(var(--space) * 1.5);
       color: var(--c-text);
     }
+
     .hero-subtitle {
       font-size: 18px;
       color: var(--c-muted);
       margin-bottom: calc(var(--space) * 3);
       line-height: 1.7;
     }
-    .hero-ctas {
+
+    .hero-cta {
       display: flex;
       gap: calc(var(--space) * 1.5);
       justify-content: center;
       flex-wrap: wrap;
     }
+
     .btn {
       padding: calc(var(--space) * 0.875) calc(var(--space) * 2);
       border-radius: var(--radius);
+      font-size: 15px;
+      font-weight: 500;
       border: none;
-      font-family: var(--f-body);
-      font-size: 14px;
-      font-weight: 600;
       cursor: pointer;
       transition: all 0.2s;
       text-decoration: none;
-      display: inline-flex;
-      align-items: center;
-      gap: calc(var(--space) * 0.5);
+      display: inline-block;
+      font-family: var(--f-body);
     }
+
     .btn-primary {
-      background: var(--c-primary);
+      background-color: var(--c-primary);
       color: white;
     }
+
     .btn-primary:hover {
-      background: color-mix(in srgb, var(--c-primary) 90%, black);
-      box-shadow: 0 4px 12px color-mix(in srgb, var(--c-primary) 30%, transparent);
+      background-color: color-mix(in srgb, var(--c-primary) 90%, black);
     }
+
     .btn-secondary {
-      background: transparent;
+      background-color: transparent;
       color: var(--c-primary);
-      border: 1.5px solid var(--c-primary);
+      border: 1px solid var(--c-primary);
     }
+
     .btn-secondary:hover {
-      background: color-mix(in srgb, var(--c-primary) 5%, transparent);
+      background-color: color-mix(in srgb, var(--c-primary) 5%, transparent);
     }
+
     /* Features Section */
-    .features-section {
-      max-width: 1280px;
-      margin: 0 auto;
+    .features {
       padding: calc(var(--space) * 5) calc(var(--space) * 2);
+      background-color: var(--c-bg);
     }
+
+    .features-container {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
     .section-title {
       font-size: 32px;
       font-weight: 700;
-      margin-bottom: calc(var(--space) * 1);
+      margin-bottom: calc(var(--space) * 0.5);
       color: var(--c-text);
-      text-align: center;
     }
+
     .section-subtitle {
       font-size: 16px;
       color: var(--c-muted);
-      text-align: center;
-      margin-bottom: calc(var(--space) * 4);
-      max-width: 600px;
-      margin-left: auto;
-      margin-right: auto;
+      margin-bottom: calc(var(--space) * 3.5);
     }
+
     .features-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
       gap: calc(var(--space) * 2);
     }
+
     .feature-card {
-      background: var(--c-surface);
+      background-color: var(--c-surface);
       border: 1px solid color-mix(in srgb, var(--c-text) 8%, transparent);
       border-radius: var(--radius);
-      padding: calc(var(--space) * 2.5);
-      transition: all 0.3s;
+      padding: calc(var(--space) * 2);
+      transition: all 0.2s;
     }
+
     .feature-card:hover {
       border-color: color-mix(in srgb, var(--c-primary) 40%, transparent);
-      box-shadow: 0 4px 16px color-mix(in srgb, var(--c-text) 8%, transparent);
-      transform: translateY(-2px);
+      box-shadow: 0 2px 8px color-mix(in srgb, var(--c-text) 4%, transparent);
     }
+
     .feature-icon {
-      width: 48px;
-      height: 48px;
-      background: color-mix(in srgb, var(--c-primary) 10%, transparent);
-      border-radius: calc(var(--radius) * 0.75);
+      width: 40px;
+      height: 40px;
+      margin-bottom: calc(var(--space) * 1.5);
       display: flex;
       align-items: center;
       justify-content: center;
-      margin-bottom: calc(var(--space) * 1.5);
-      color: var(--c-primary);
+      background-color: color-mix(in srgb, var(--c-primary) 10%, transparent);
+      border-radius: calc(var(--radius) * 0.75);
     }
-    .feature-icon svg {
-      width: 24px;
-      height: 24px;
-    }
-    .feature-title {
-      font-size: 16px;
-      font-weight: 700;
+
+    .feature-card h3 {
+      font-size: 18px;
+      font-weight: 600;
       margin-bottom: calc(var(--space) * 0.75);
       color: var(--c-text);
     }
-    .feature-desc {
+
+    .feature-card p {
       font-size: 14px;
       color: var(--c-muted);
       line-height: 1.6;
     }
-    /* Testimonial Section */
-    .testimonial-section {
-      background: color-mix(in srgb, var(--c-primary) 3%, transparent);
-      padding: calc(var(--space) * 5) calc(var(--space) * 2);
-    }
-    .testimonial-inner {
-      max-width: 800px;
-      margin: 0 auto;
-      text-align: center;
-    }
-    .testimonial-quote {
-      font-size: 20px;
-      font-weight: 500;
-      color: var(--c-text);
-      margin-bottom: calc(var(--space) * 2);
-      line-height: 1.7;
-      font-style: italic;
-    }
-    .testimonial-author {
-      color: var(--c-muted);
-      font-size: 14px;
-    }
-    .testimonial-author strong {
-      color: var(--c-text);
-      font-weight: 600;
-    }
+
     /* CTA Section */
     .cta-section {
-      max-width: 1280px;
-      margin: 0 auto;
-      padding: calc(var(--space) * 5) calc(var(--space) * 2);
+      background-color: var(--c-surface);
+      padding: calc(var(--space) * 4) calc(var(--space) * 2);
       text-align: center;
+      border-top: 1px solid color-mix(in srgb, var(--c-text) 6%, transparent);
+      border-bottom: 1px solid color-mix(in srgb, var(--c-text) 6%, transparent);
     }
-    .cta-title {
+
+    .cta-content {
+      max-width: 600px;
+      margin: 0 auto;
+    }
+
+    .cta-content h2 {
       font-size: 28px;
       font-weight: 700;
       margin-bottom: calc(var(--space) * 1);
       color: var(--c-text);
     }
-    .cta-subtitle {
+
+    .cta-content p {
       font-size: 16px;
       color: var(--c-muted);
       margin-bottom: calc(var(--space) * 2.5);
     }
+
     /* Footer */
     .footer {
-      background: var(--c-surface);
-      border-top: 1px solid color-mix(in srgb, var(--c-text) 6%, transparent);
+      background-color: var(--c-surface);
+      border-top: 1px solid color-mix(in srgb, var(--c-text) 8%, transparent);
       padding: calc(var(--space) * 3) calc(var(--space) * 2);
-      margin-top: auto;
     }
-    .footer-inner {
-      max-width: 1280px;
+
+    .footer-content {
+      max-width: 1200px;
       margin: 0 auto;
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
       gap: calc(var(--space) * 3);
       margin-bottom: calc(var(--space) * 2);
     }
-    .footer-col h3 {
+
+    .footer-col h4 {
       font-size: 14px;
       font-weight: 600;
-      margin-bottom: calc(var(--space) * 1.5);
+      margin-bottom: calc(var(--space) * 1.25);
       color: var(--c-text);
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
     }
+
     .footer-col ul {
       list-style: none;
     }
-    .footer-col ul li {
+
+    .footer-col li {
       margin-bottom: calc(var(--space) * 0.75);
     }
+
     .footer-col a {
+      font-size: 13px;
       color: var(--c-muted);
       text-decoration: none;
-      font-size: 13px;
       transition: color 0.2s;
     }
+
     .footer-col a:hover {
-      color: var(--c-primary);
+      color: var(--c-text);
     }
+
     .footer-bottom {
       border-top: 1px solid color-mix(in srgb, var(--c-text) 6%, transparent);
       padding-top: calc(var(--space) * 2);
       display: flex;
       justify-content: space-between;
       align-items: center;
+      flex-wrap: wrap;
+      gap: calc(var(--space) * 2);
+    }
+
+    .footer-bottom p {
       font-size: 13px;
       color: var(--c-muted);
-      flex-wrap: wrap;
-      gap: calc(var(--space) * 1);
+    }
+
+    .footer-links {
+      display: flex;
+      gap: calc(var(--space) * 2);
+      list-style: none;
+    }
+
+    .footer-links a {
+      font-size: 13px;
+      color: var(--c-muted);
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+
+    .footer-links a:hover {
+      color: var(--c-text);
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      .hero h1 {
+        font-size: 36px;
+      }
+
+      .hero-subtitle {
+        font-size: 16px;
+      }
+
+      .section-title {
+        font-size: 24px;
+      }
+
+      .nav-links {
+        gap: calc(var(--space) * 1);
+      }
+
+      .nav-links a {
+        font-size: 13px;
+      }
     }
   </style>
 
-  <div class="root">
-    <!-- Header -->
-    <header class="header">
-      <div class="header-inner">
-        <a href="#" class="logo">
-          <div class="logo-mark">M</div>
-          MediFlow
-        </a>
-        <nav>
-          <ul class="nav-links">
-            <li><a href="#features">Features</a></li>
-            <li><a href="#about">About</a></li>
-            <li><a href="#pricing">Pricing</a></li>
-            <li><a href="#contact">Contact</a></li>
-          </ul>
-        </nav>
+  <!-- Header -->
+  <header class="header">
+    <a href="/" class="logo">
+      <div class="logo-icon">
+        <svg width="28" height="28" viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <rect x="4" y="4" width="8" height="8" fill="var(--c-primary)" rx="1.5"/>
+          <rect x="16" y="4" width="8" height="8" fill="var(--c-accent)" rx="1.5"/>
+          <rect x="4" y="16" width="8" height="8" fill="var(--c-secondary)" rx="1.5"/>
+          <rect x="16" y="16" width="8" height="8" fill="var(--c-primary)" rx="1.5" opacity="0.6"/>
+        </svg>
       </div>
-    </header>
+      MediFlow
+    </a>
+    <nav>
+      <ul class="nav-links">
+        <li><a href="#features">Features</a></li>
+        <li><a href="#about">About</a></li>
+        <li><a href="#contact">Contact</a></li>
+      </ul>
+    </nav>
+  </header>
 
-    <!-- Main -->
-    <main class="main">
-      <!-- Hero -->
-      <section class="hero">
-        <div class="hero-inner">
-          <div class="hero-badge">
-            <svg viewBox="0 0 16 16" fill="currentColor">
-              <path d="M8 0c4.4 0 8 3.6 8 8s-3.6 8-8 8-8-3.6-8-8 3.6-8 8-8zm1 11H7v2h2v-2zm0-8H7v6h2V3z"/>
-            </svg>
-            AI-Powered Healthcare Coordination
-          </div>
-          <h1 class="hero-title">Your Medical History, Unified & Auditable</h1>
-          <p class="hero-subtitle">MediFlow aggregates fragmented medical records across providers into a single, trustworthy timeline. Understand your complete care journey with AI-backed summaries tied to source documents.</p>
-          <div class="hero-ctas">
-            <button class="btn btn-primary">
-              <svg viewBox="0 0 16 16" fill="currentColor" width="16" height="16">
-                <path d="M8 1.5a6.5 6.5 0 100 13 6.5 6.5 0 000-13zM6.5 10l-2-2m0 0l2-2m-2 2h7"/>
-              </svg>
-              Sign Up Free
-            </button>
-            <button class="btn btn-secondary">Learn More</button>
-          </div>
+  <!-- Main Content -->
+  <main class="main">
+    <!-- Hero Section -->
+    <section class="hero">
+      <div class="hero-content">
+        <h1>Your complete medical history, unified</h1>
+        <p class="hero-subtitle">MediFlow brings together fragmented patient records across providers. Get instant access to your full medical timeline, identify care gaps, and stay coordinated with your healthcare team.</p>
+        <div class="hero-cta">
+          <button class="btn btn-primary">Sign In</button>
+          <button class="btn btn-secondary">Learn More</button>
         </div>
-      </section>
+      </div>
+    </section>
 
-      <!-- Features -->
-      <section class="features-section" id="features">
-        <h2 class="section-title">Core Capabilities</h2>
-        <p class="section-subtitle">MediFlow brings clarity and continuity to fragmented healthcare.</p>
+    <!-- Features Section -->
+    <section class="features" id="features">
+      <div class="features-container">
+        <h2 class="section-title">How MediFlow Works</h2>
+        <p class="section-subtitle">Intelligent coordination across your entire care network</p>
+        
         <div class="features-grid">
           <div class="feature-card">
             <div class="feature-icon">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/>
-                <polyline points="14 2 14 8 20 8"/>
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M9 3H5C3.9 3 3 3.9 3 5v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V9" stroke="var(--c-primary)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                <path d="M9 9h6M9 15h6M9 12h6" stroke="var(--c-primary)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
               </svg>
             </div>
-            <h3 class="feature-title">Multimodal Document Parsing</h3>
-            <p class="feature-desc">Upload and extract insights from PDFs, discharge summaries, prescriptions, lab reports, and medical images—all automatically organized.</p>
+            <h3>Unified Records</h3>
+            <p>Upload and parse medical documents from any provider—discharge summaries, prescriptions, test results, and imaging reports all in one place.</p>
           </div>
 
           <div class="feature-card">
             <div class="feature-icon">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <circle cx="12" cy="12" r="1"/>
-                <path d="M12 1v6m0 6v6"/>
-                <path d="M4.22 4.22l4.24 4.24m5.08 5.08l4.24 4.24"/>
-                <path d="M1 12h6m6 0h6"/>
-                <path d="M4.22 19.78l4.24-4.24m5.08-5.08l4.24-4.24"/>
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z" stroke="var(--c-primary)" stroke-width="2" stroke-linejoin="round"/>
+                <polyline points="9 22 9 12 15 12 15 22" stroke="var(--c-primary)" stroke-width="2" stroke-linejoin="round"/>
               </svg>
             </div>
-            <h3 class="feature-title">Chronological Timeline</h3>
-            <p class="feature-desc">Automatically synthesize consultations, medications, tests, and treatments into a clear, auditable sequence across all providers.</p>
+            <h3>Smart Timeline</h3>
+            <p>Automatically organize consultations, medications, tests, and treatments into a chronological view you can understand at a glance.</p>
           </div>
 
           <div class="feature-card">
             <div class="feature-icon">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z"/>
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <circle cx="12" cy="12" r="9" stroke="var(--c-primary)" stroke-width="2"/>
+                <path d="M12 7v5l3 2" stroke="var(--c-primary)" stroke-width="2" stroke-linecap="round"/>
               </svg>
             </div>
-            <h3 class="feature-title">Medication Conflict Detection</h3>
-            <p class="feature-desc">AI flags duplicate prescriptions and dangerous interactions across your care network using semantic analysis—before they cause harm.</p>
+            <h3>Proactive Alerts</h3>
+            <p>Never miss a follow-up or preventive care milestone. Get notified about scheduling windows and medication interactions across your network.</p>
           </div>
 
           <div class="feature-card">
             <div class="feature-icon">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/>
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm3.5-9c.83 0 1.5-.67 1.5-1.5S16.33 8 15.5 8 14 8.67 14 9.5s.67 1.5 1.5 1.5zm-7 0c.83 0 1.5-.67 1.5-1.5S9.33 8 8.5 8 7 8.67 7 9.5 7.67 11 8.5 11zm3.5 6.5c2.33 0 4.31-1.46 5.11-3.5H6.89c.8 2.04 2.78 3.5 5.11 3.5z" fill="var(--c-primary)"/>
               </svg>
             </div>
-            <h3 class="feature-title">Care Gap Alerts</h3>
-            <p class="feature-desc">Never miss a follow-up or preventive care deadline. MediFlow proactively notifies you of appointments, screenings, and medication refills.</p>
+            <h3>Conflict Detection</h3>
+            <p>AI-powered semantic analysis identifies duplicate or conflicting medications across your entire health network automatically.</p>
           </div>
 
           <div class="feature-card">
             <div class="feature-icon">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M9 12l2 2 4-4m7 0a9 9 0 11-18 0 9 9 0 0118 0z" stroke="var(--c-primary)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
               </svg>
             </div>
-            <h3 class="feature-title">Complete Audit Trail</h3>
-            <p class="feature-desc">Every AI summary is linked to the original source text. Verify insights instantly and maintain full transparency with your providers.</p>
+            <h3>Complete Audit Trail</h3>
+            <p>Every AI-generated summary is bound to source text snippets. Full transparency and traceability for clinical confidence.</p>
           </div>
 
           <div class="feature-card">
             <div class="feature-icon">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/>
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M3 5a2 2 0 012-2h3.28a1 1 0 00.948-.684l1.498-4.493a1 1 0 011.502-.684l1.498 4.493a1 1 0 00.948.684H19a2 2 0 012 2v2a2 2 0 01-2 2H5a2 2 0 01-2-2V5z" stroke="var(--c-primary)" stroke-width="2" stroke-linejoin="round"/>
+                <path d="M3 15a2 2 0 012-2h3.28a1 1 0 00.948-.684l1.498-4.493a1 1 0 011.502-.684l1.498 4.493a1 1 0 00.948.684H19a2 2 0 012 2v2a2 2 0 01-2 2H5a2 2 0 01-2-2v-2z" stroke="var(--c-primary)" stroke-width="2" stroke-linejoin="round"/>
               </svg>
             </div>
-            <h3 class="feature-title">Conversational Health Coach</h3>
-            <p class="feature-desc">Chat with an AI that remembers your scheduling preferences, medication constraints, and full medical context for personalized guidance.</p>
+            <h3>Plain Language</h3>
+            <p>Clinical terminology translated into clear explanations in multiple languages. Healthcare that's accessible to everyone.</p>
           </div>
-        </div>
-      </section>
-
-      <!-- Testimonial -->
-      <section class="testimonial-section">
-        <div class="testimonial-inner">
-          <p class="testimonial-quote">"I spent hours on the phone coordinating between my cardiologist, endocrinologist, and primary care. MediFlow gave me a single source of truth—and caught a duplicate medication my doctors missed."</p>
-          <p class="testimonial-author"><strong>Sarah M.</strong>, Patient managing multiple chronic conditions</p>
-        </div>
-      </section>
-
-      <!-- Final CTA -->
-      <section class="cta-section">
-        <h2 class="cta-title">Ready to Take Control of Your Health?</h2>
-        <p class="cta-subtitle">Join thousands of patients and providers who trust MediFlow.</p>
-        <div class="hero-ctas">
-          <button class="btn btn-primary">Get Started Now</button>
-          <button class="btn btn-secondary">Schedule a Demo</button>
-        </div>
-      </section>
-    </main>
-
-    <!-- Footer -->
-    <footer class="footer">
-      <div class="footer-inner">
-        <div class="footer-col">
-          <h3>Product</h3>
-          <ul>
-            <li><a href="#">Features</a></li>
-            <li><a href="#">Security</a></li>
-            <li><a href="#">Integrations</a></li>
-            <li><a href="#">Pricing</a></li>
-          </ul>
-        </div>
-        <div class="footer-col">
-          <h3>Company</h3>
-          <ul>
-            <li><a href="#">About Us</a></li>
-            <li><a href="#">Blog</a></li>
-            <li><a href="#">Careers</a></li>
-            <li><a href="#">Contact</a></li>
-          </ul>
-        </div>
-        <div class="footer-col">
-          <h3>Legal</h3>
-          <ul>
-            <li><a href="#">Privacy Policy</a></li>
-            <li><a href="#">Terms of Service</a></li>
-            <li><a href="#">HIPAA Compliance</a></li>
-            <li><a href="#">Accessibility</a></li>
-          </ul>
-        </div>
-        <div class="footer-col">
-          <h3>Connect</h3>
-          <ul>
-            <li><a href="#">LinkedIn</a></li>
-            <li><a href="#">Twitter</a></li>
-            <li><a href="#">GitHub</a></li>
-            <li><a href="#">Email</a></li>
-          </ul>
         </div>
       </div>
-      <div class="footer-bottom">
-        <span>&copy; 2024 MediFlow. All rights reserved.</span>
-        <span>HIPAA Compliant • SOC 2 Certified</span>
+    </section>
+
+    <!-- CTA Section -->
+    <section class="cta-section">
+      <div class="cta-content">
+        <h2>Ready to take control of your health?</h2>
+        <p>Join thousands of patients and providers using MediFlow to coordinate better care.</p>
+        <button class="btn btn-primary">Get Started Free</button>
       </div>
-    </footer>
-  </div>
+    </section>
+  </main>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="footer-content">
+      <div class="footer-col">
+        <h4>Product</h4>
+        <ul>
+          <li><a href="#">Features</a></li>
+          <li><a href="#">Pricing</a></li>
+          <li><a href="#">Security</a></li>
+          <li><a href="#">Roadmap</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>Company</h4>
+        <ul>
+          <li><a href="#">About</a></li>
+          <li><a href="#">Blog</a></li>
+          <li><a href="#">Careers</a></li>
+          <li><a href="#">Press</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>Resources</h4>
+        <ul>
+          <li><a href="#">Documentation</a></li>
+          <li><a href="#">API Reference</a></li>
+          <li><a href="#">Support</a></li>
+          <li><a href="#">Community</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>Legal</h4>
+        <ul>
+          <li><a href="#">Privacy</a></li>
+          <li><a href="#">Terms</a></li>
+          <li><a href="#">Compliance</a></li>
+          <li><a href="#">Contact</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <p>&copy; 2024 MediFlow. All rights reserved.</p>
+      <ul class="footer-links">
+        <li><a href="#">Twitter</a></li>
+        <li><a href="#">LinkedIn</a></li>
+        <li><a href="#">GitHub</a></li>
+      </ul>
+    </div>
+  </footer>
 </div>

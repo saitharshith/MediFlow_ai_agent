@@ -1,26 +1,42 @@
 {
   "schemaVersion": 2,
   "createdAt": "2026-07-19T01:54:09.849Z",
-  "updatedAt": "2026-07-19T05:20:03.544Z",
+  "updatedAt": "2026-07-19T07:13:02.669Z",
   "phases": {
     "prd": {
-      "updatedAt": "2026-07-19T04:32:03.537Z",
+      "updatedAt": "2026-07-19T06:50:59.251Z",
       "committed": true
     },
     "persona": {
-      "updatedAt": "2026-07-19T04:32:05.253Z",
+      "updatedAt": "2026-07-19T06:51:50.166Z",
       "committed": true
     },
     "brand-guided": {
-      "updatedAt": "2026-07-19T05:20:03.544Z",
+      "updatedAt": "2026-07-19T06:53:17.494Z",
       "committed": true
     },
     "stack": {
-      "updatedAt": "2026-07-19T04:33:11.466Z",
+      "updatedAt": "2026-07-19T06:55:15.123Z",
       "committed": true
     },
     "apis": {
-      "updatedAt": "2026-07-19T04:33:37.675Z",
+      "updatedAt": "2026-07-19T06:56:03.610Z",
+      "committed": true
+    },
+    "schema": {
+      "updatedAt": "2026-07-19T06:57:46.055Z",
+      "committed": true
+    },
+    "atlas": {
+      "updatedAt": "2026-07-19T06:59:15.307Z",
+      "committed": true
+    },
+    "ble": {
+      "updatedAt": "2026-07-19T07:01:17.386Z",
+      "committed": true
+    },
+    "generate": {
+      "updatedAt": "2026-07-19T07:13:02.669Z",
       "committed": true
     }
   },

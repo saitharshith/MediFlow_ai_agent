@@ -2,32 +2,35 @@
   "personas": [
     {
       "name": "Patient",
-      "short_description": "Manages medical records, views care timeline, schedules appointments, receives reminders and plain-language health explanations.",
+      "short_description": "Manages medical records, views care timeline/graph, schedules appointments, receives explanations, monitors record access.",
       "key_responsibilities": [
-        "Ingest and extract structured data from medical documents via OCR/AI",
-        "Build longitudinal patient timelines from prescriptions, tests, consultations, and treatments",
-        "Schedule appointments based on doctor availability and urgency",
-        "Send personalized reminders for medications, vaccinations, tests, and follow-ups",
-        "Provide multilingual plain-language explanations of prescriptions and medical terms",
-        "Generate personalized treatment journey dashboard for patients"
+        "Upload and extract structured data from medical documents",
+        "Visualize patient history as an interactive knowledge graph",
+        "Detect duplicate medications, drug interactions, and missed follow-ups",
+        "Trace every AI-extracted fact to its source document",
+        "Grant time-limited doctor access via OTP with full audit logging",
+        "Provide multilingual plain-language explanations of prescriptions"
       ]
     },
     {
       "name": "Doctor",
-      "short_description": "Reviews AI-summarized patient history with source traceability before consultations; detects care gaps and conflict risks.",
+      "short_description": "Accesses verified patient history summaries via OTP, reviews source-traced facts before consultations.",
       "key_responsibilities": [
-        "Detect duplicate medications, conflicting prescriptions, and missed follow-ups",
-        "Recommend appropriate specialists based on symptoms and medical history",
-        "Deliver AI-summarized patient history with source traceability to doctors"
+        "Grant time-limited doctor access via OTP with full audit logging",
+        "Generate AI-powered clinical summaries for doctors with source verification",
+        "Trace every AI-extracted fact to its source document",
+        "Visualize patient history as an interactive knowledge graph",
+        "Recommend appropriate specialists based on symptoms and history"
       ]
     },
     {
       "name": "Hospital Administrator",
-      "short_description": "Tracks hospital-wide operational efficiency, compliance rates, appointment bottlenecks, and patient care timeline metrics.",
+      "short_description": "Monitors anonymized operational metrics, compliance, bottlenecks, and treatment timelines across patient cohorts.",
       "key_responsibilities": [
-        "Analyze hospital-wide metrics on compliance, bottlenecks, and care timelines",
-        "Detect duplicate medications, conflicting prescriptions, and missed follow-ups",
-        "Send personalized reminders for medications, vaccinations, tests, and follow-ups"
+        "Display hospital-level analytics on compliance, bottlenecks, and treatment timelines",
+        "Detect duplicate medications, drug interactions, and missed follow-up appointments",
+        "Trace every AI-extracted fact to its source document",
+        "Grant time-limited doctor access via OTP with full audit logging"
       ]
     }
   ]

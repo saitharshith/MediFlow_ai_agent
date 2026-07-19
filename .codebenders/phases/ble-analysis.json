@@ -1,0 +1,2227 @@
+[
+  {
+    "flow_id": "F001",
+    "name": "Patient Document Upload & AI Extraction",
+    "description": "Patient uploads medical documents (prescription, diagnostic report, discharge summary) and reviews AI-extracted structured facts before committing them to their timeline.",
+    "priority": "P1",
+    "priority_label": "High Use",
+    "steps": [
+      {
+        "step_id": "1",
+        "description": "Patient navigates to document upload section in their portal",
+        "component_name": "PatientDashboard",
+        "component_path": "src/components/patient/PatientDashboard.tsx",
+        "order": 1,
+        "business_rules": [
+          {
+            "name": "patient_authentication_required",
+            "priority": "High",
+            "description": "Patient must be authenticated before accessing the document upload section; unauthenticated users are redirected to login.",
+            "status": "generated"
+          },
+          {
+            "name": "document_upload_capability_check",
+            "priority": "High",
+            "description": "System must verify that document upload feature is enabled via feature flag before displaying upload UI.",
+            "status": "generated"
+          },
+          {
+            "name": "supported_document_types_validation",
+            "priority": "High",
+            "description": "Only prescriptions, diagnostic reports, discharge summaries, and medical history documents (PDF or image formats) are accepted for upload.",
+            "status": "generated"
+          },
+          {
+            "name": "document_size_limit_enforcement",
+            "priority": "Medium",
+            "description": "Uploaded documents must not exceed 50 MB to prevent storage bloat and ensure timely AI processing.",
+            "status": "generated"
+          },
+          {
+            "name": "document_metadata_capture",
+            "priority": "Medium",
+            "description": "System must capture and store document title, upload timestamp, and patient ID at upload time for audit and retrieval.",
+            "status": "generated"
+          },
+          {
+            "name": "ai_extraction_initiation",
+            "priority": "High",
+            "description": "After successful document upload, trigger AI extraction pipeline using OpenAI multimodal vision API (OPENAI_API_KEY) to extract structured facts and populate extracted_facts table.",
+            "status": "generated"
+          },
+          {
+            "name": "extraction_traceability_requirement",
+            "priority": "High",
+            "description": "Every extracted fact must maintain a reference to its source document line/location and confidence score to ensure transparency and auditability.",
+            "status": "generated"
+          },
+          {
+            "name": "document_access_logging",
+            "priority": "High",
+            "description": "Every document upload and access event must be logged to access_logs table with user_id, action, timestamp, and IP address for patient visibility and compliance.",
+            "status": "generated"
+          },
+          {
+            "name": "multilingual_ui_support",
+            "priority": "Medium",
+            "description": "Document upload UI must respect patient's language preference (from profile) and display instructions and error messages in that language using Bhashini API (BHASHINI_API_KEY, BHASHINI_USER_ID).",
+            "status": "generated"
+          }
+        ],
+        "validation_rules": []
+      },
+      {
+        "step_id": "2",
+        "description": "Patient selects and uploads a medical document (image or PDF)",
+        "component_name": "DocumentUploadForm",
+        "component_path": "src/components/patient/DocumentUploadForm.tsx",
+        "order": 2,
+        "business_rules": [
+          {
+            "name": "document_file_format_validation",
+            "priority": "High",
+            "description": "Only PDF and image file formats (JPEG, PNG, GIF, WebP) are accepted for medical document uploads to ensure compatibility with AI extraction pipeline using OPENAI_API_KEY.",
+            "status": "generated"
+          },
+          {
+            "name": "document_file_size_limit",
+            "priority": "High",
+            "description": "Uploaded medical documents must not exceed 20 MB to prevent storage bloat and API timeout during AI extraction.",
+            "status": "generated"
+          },
+          {
+            "name": "document_type_classification",
+            "priority": "High",
+            "description": "Each uploaded document must be classified into one of: prescription, diagnostic_report, discharge_summary, or medical_history to enable targeted AI extraction and timeline construction.",
+            "status": "generated"
+          },
+          {
+            "name": "document_status_workflow",
+            "priority": "High",
+            "description": "Document status must transition through: pending → processing → extracted → completed (or failed), with status updates logged and visible to patient.",
+            "status": "generated"
+          },
+          {
+            "name": "ai_extraction_traceability",
+            "priority": "High",
+            "description": "Every extracted fact must record its source document ID and line/section reference in extracted_facts.metadata to ensure traceability and patient transparency per PRD requirement.",
+            "status": "generated"
+          },
+          {
+            "name": "document_patient_ownership",
+            "priority": "High",
+            "description": "Uploaded document must be associated with the authenticated patient (via patient ID from session) and stored with patient-scoped access controls.",
+            "status": "generated"
+          },
+          {
+            "name": "duplicate_document_detection",
+            "priority": "Medium",
+            "description": "System should detect and warn if a document with identical content hash already exists for the patient to prevent duplicate timeline entries.",
+            "status": "generated"
+          },
+          {
+            "name": "extraction_confidence_scoring",
+            "priority": "Medium",
+            "description": "AI extraction must assign a confidence_score (0.0–1.0) to each extracted fact; facts below 0.7 should be flagged for patient review.",
+            "status": "generated"
+          },
+          {
+            "name": "document_version_tracking",
+            "priority": "Medium",
+            "description": "If a patient re-uploads a document (e.g., corrected version), increment documents.version and preserve prior version for audit trail.",
+            "status": "generated"
+          },
+          {
+            "name": "extraction_method_logging",
+            "priority": "Medium",
+            "description": "Each extracted fact must record the extraction_method (e.g., 'openai_vision', 'ocr_fallback') to enable quality monitoring and method-specific debugging.",
+            "status": "generated"
+          }
+        ],
+        "validation_rules": []
+      },
+      {
+        "step_id": "3",
+        "description": "System calls OpenAI vision API to extract structured facts (drug, dose, date, doctor, condition) from the document using forced JSON tool schema",
+        "component_name": "ExtractionProcessor",
+        "component_path": "src/services/extraction/ExtractionProcessor.ts",
+        "order": 3,
+        "business_rules": [
+          {
+            "name": "openai_vision_extraction_with_forced_schema",
+            "priority": "High",
+            "description": "System must call OpenAI vision API with forced JSON tool schema to extract drug, dose, date, doctor, and condition facts from uploaded document, ensuring structured output conformance.",
+            "status": "generated"
+          },
+          {
+            "name": "extracted_facts_traceability_to_source",
+            "priority": "High",
+            "description": "Every extracted fact must maintain immutable reference to source document line/region and store confidence score to enable patient audit trail and doctor verification.",
+            "status": "generated"
+          },
+          {
+            "name": "extraction_method_logging",
+            "priority": "Medium",
+            "description": "Record extraction_method as 'openai_vision' and store API call metadata (model version, timestamp, tokens used) in extracted_facts.metadata for audit and cost tracking.",
+            "status": "generated"
+          },
+          {
+            "name": "openai_api_key_validation",
+            "priority": "High",
+            "description": "System must validate OPENAI_API_KEY environment variable is set and valid before attempting vision API call; fail fast with clear error if missing.",
+            "status": "generated"
+          },
+          {
+            "name": "fact_type_classification",
+            "priority": "High",
+            "description": "Extracted facts must be classified into predefined fact_type categories (drug, dose, date, doctor, condition) to enable timeline and graph construction.",
+            "status": "generated"
+          },
+          {
+            "name": "confidence_score_threshold_for_timeline",
+            "priority": "Medium",
+            "description": "Facts with confidence_score < 0.7 should be marked for manual verification before inclusion in patient-facing timeline; high-confidence facts (≥0.7) auto-included.",
+            "status": "generated"
+          }
+        ],
+        "validation_rules": []
+      },
+      {
+        "step_id": "4",
+        "description": "System stores extracted facts in extracted_facts table with source_document_id and quoted snippet for traceability",
+        "component_name": "FactLedger",
+        "component_path": "src/services/ledger/FactLedger.ts",
+        "order": 4,
+        "business_rules": [
+          {
+            "name": "source_document_traceability",
+            "priority": "High",
+            "description": "Every extracted fact must maintain a direct reference to its source document via source_document_id and include a quoted snippet for audit and verification purposes.",
+            "status": "generated"
+          },
+          {
+            "name": "fact_type_classification",
+            "priority": "High",
+            "description": "Each extracted fact must be classified into a valid fact_type (e.g., medication, diagnosis, consultation, test, treatment) to enable knowledge graph construction and timeline organization.",
+            "status": "generated"
+          },
+          {
+            "name": "confidence_score_validation",
+            "priority": "Medium",
+            "description": "Extracted facts must include a confidence_score (0.00–1.00) indicating AI extraction reliability; facts below a configurable threshold should be flagged for manual review.",
+            "status": "generated"
+          },
+          {
+            "name": "extraction_method_logging",
+            "priority": "Medium",
+            "description": "Each fact must record the extraction_method (e.g., 'openai_vision', 'ocr', 'manual') to enable audit trails and method performance analysis.",
+            "status": "generated"
+          },
+          {
+            "name": "metadata_enrichment",
+            "priority": "Medium",
+            "description": "Extracted facts should include metadata (jsonb) capturing line numbers, page references, or additional context from the source document for enhanced traceability.",
+            "status": "generated"
+          },
+          {
+            "name": "document_existence_check",
+            "priority": "High",
+            "description": "Before storing extracted facts, verify that the referenced source_document_id exists in the documents table and belongs to the correct patient.",
+            "status": "generated"
+          },
+          {
+            "name": "duplicate_fact_prevention",
+            "priority": "Medium",
+            "description": "Prevent duplicate extraction of the same fact from the same source document by checking content hash or semantic similarity.",
+            "status": "generated"
+          }
+        ],
+        "validation_rules": []
+      },
+      {
+        "step_id": "5",
+        "description": "Patient reviews extraction results showing detected medications, appointments, conditions with confidence scores",
+        "component_name": "ExtractionReviewPanel",
+        "component_path": "src/components/patient/ExtractionReviewPanel.tsx",
+        "order": 5,
+        "business_rules": [
+          {
+            "name": "confidence_score_threshold_display",
+            "priority": "High",
+            "description": "Display extracted facts only if confidence_score meets minimum threshold; facts below threshold must be flagged for manual review or hidden by default.",
+            "status": "generated"
+          },
+          {
+            "name": "extraction_source_traceability",
+            "priority": "High",
+            "description": "Every extracted fact must be traceable to its source document line; UI must display source_document_id and allow patient to view original document excerpt.",
+            "status": "generated"
+          },
+          {
+            "name": "medication_extraction_validation",
+            "priority": "High",
+            "description": "Extracted medications must include drug name, dosage, and frequency; validate against RxNorm API (RXNORM_API_URL) to flag invalid or misspelled drug names.",
+            "status": "generated"
+          },
+          {
+            "name": "appointment_extraction_validation",
+            "priority": "High",
+            "description": "Extracted appointments must include date, time, and provider; validate date format and ensure appointment is in future or recent past.",
+            "status": "generated"
+          },
+          {
+            "name": "condition_extraction_validation",
+            "priority": "Medium",
+            "description": "Extracted conditions must be mapped to ICD-10 or SNOMED CT codes where possible; flag unmapped conditions for manual review.",
+            "status": "generated"
+          },
+          {
+            "name": "extraction_review_acceptance_logging",
+            "priority": "High",
+            "description": "When patient accepts or rejects extracted facts, log the decision with timestamp and fact IDs to access_logs for audit trail.",
+            "status": "generated"
+          },
+          {
+            "name": "multilingual_extraction_display",
+            "priority": "Medium",
+            "description": "Display extracted facts in patient's preferred language (from profile language preference); use Bhashini API (BHASHINI_API_KEY, BHASHINI_USER_ID) for translation if extraction was in different language.",
+            "status": "generated"
+          },
+          {
+            "name": "duplicate_extraction_detection",
+            "priority": "Medium",
+            "description": "Detect and merge duplicate extracted facts (e.g., same medication extracted from multiple documents); display merged view with all source documents.",
+            "status": "generated"
+          },
+          {
+            "name": "high_risk_flag_detection",
+            "priority": "High",
+            "description": "Flag extracted facts that indicate high-risk conditions (e.g., drug interactions, allergies, critical diagnoses) and require explicit patient acknowledgment before acceptance.",
+            "status": "generated"
+          }
+        ],
+        "validation_rules": []
+      },
+      {
+        "step_id": "6",
+        "description": "Patient confirms extraction; facts are committed to timeline and medications table",
+        "component_name": "ExtractionConfirmation",
+        "component_path": "src/components/patient/ExtractionConfirmation.tsx",
+        "order": 6,
+        "business_rules": [
+          {
+            "name": "extraction_confirmation_commits_facts",
+            "priority": "High",
+            "description": "When patient confirms extraction, all extracted_facts with verified=true must be committed to the timeline and medications table, with source traceability maintained via extracted_facts.source_document_id.",
+            "status": "generated"
+          },
+          {
+            "name": "fact_type_validation_before_commit",
+            "priority": "High",
+            "description": "Only extracted_facts with fact_type in ['medication', 'consultation', 'diagnosis', 'test', 'treatment', 'allergy'] may be committed; others must be flagged for manual review.",
+            "status": "generated"
+          },
+          {
+            "name": "confidence_score_threshold_check",
+            "priority": "Medium",
+            "description": "Extracted facts with confidence_score < 0.70 must be flagged for patient review before commitment; facts >= 0.70 may auto-commit if patient approves.",
+            "status": "generated"
+          },
+          {
+            "name": "source_document_traceability",
+            "priority": "High",
+            "description": "Every committed extracted_fact must retain extracted_facts.source_document_id linking back to the original documents record for audit and verification.",
+            "status": "generated"
+          },
+          {
+            "name": "medications_table_population",
+            "priority": "High",
+            "description": "When extracted_facts with fact_type='medication' are confirmed, corresponding records must be inserted into medications table with metadata from extracted_facts.metadata.",
+            "status": "generated"
+          },
+          {
+            "name": "document_status_update_on_confirmation",
+            "priority": "Medium",
+            "description": "When patient confirms extraction, the source documents.status must be updated to 'processed' and documents.updated_at set to current timestamp.",
+            "status": "generated"
+          },
+          {
+            "name": "extraction_audit_logging",
+            "priority": "Medium",
+            "description": "When facts are committed, an audit entry must be created in access_logs with action='extraction_confirmed' and resource pointing to the source document.",
+            "status": "generated"
+          }
+        ],
+        "validation_rules": [
+          {
+            "field_name": "extracted_facts",
+            "description": "At least one extracted fact must be selected for confirmation before commit.",
+            "status": "generated"
+          },
+          {
+            "field_name": "extracted_facts.content",
+            "description": "Each extracted fact content must be non-empty and non-null.",
+            "status": "generated"
+          },
+          {
+            "field_name": "extracted_facts.fact_type",
+            "description": "Fact type must be one of: medication, consultation, diagnosis, test, treatment, allergy.",
+            "status": "generated"
+          },
+          {
+            "field_name": "extracted_facts.confidence_score",
+            "description": "Confidence score must be between 0.0 and 1.0; scores below 0.70 require explicit patient approval.",
+            "status": "generated"
+          },
+          {
+            "field_name": "patient_approval",
+            "description": "Patient must explicitly check a confirmation checkbox before facts can be committed.",
+            "status": "generated"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "flow_id": "F002",
+    "name": "Patient Views Knowledge Graph Timeline",
+    "description": "Patient visualizes their complete medical history as an interactive knowledge graph showing visits, doctors, medications, conditions, and tests as nodes with relationships as edges.",
+    "priority": "P1",
+    "priority_label": "High Use",
+    "steps": [
+      {
+        "step_id": "1",
+        "description": "Patient opens their dashboard and selects 'View Timeline & Graph'",
+        "component_name": "PatientDashboard",
+        "component_path": "src/components/patient/PatientDashboard.tsx",
+        "order": 1,
+        "business_rules": [
+          {
+            "name": "patient_authentication_required",
+            "priority": "High",
+            "description": "Patient must be authenticated before accessing timeline and knowledge graph view.",
+            "status": "generated"
+          },
+          {
+            "name": "timeline_data_availability",
+            "priority": "High",
+            "description": "Timeline view requires extracted facts and documents to be available and processed for the authenticated patient.",
+            "status": "generated"
+          },
+          {
+            "name": "knowledge_graph_construction",
+            "priority": "High",
+            "description": "Knowledge graph must be built from extracted facts with nodes (visits, doctors, medications, conditions, tests) and edges (prescriptions, follow-ups) derived from extracted_facts records.",
+            "status": "generated"
+          },
+          {
+            "name": "fact_traceability_to_source",
+            "priority": "High",
+            "description": "Every fact displayed in timeline and graph must be traceable to its source document via extracted_facts.source_document_id.",
+            "status": "generated"
+          },
+          {
+            "name": "access_logging_for_timeline_view",
+            "priority": "Medium",
+            "description": "Log patient's access to timeline and knowledge graph view in access_logs for audit trail.",
+            "status": "generated"
+          },
+          {
+            "name": "multilingual_timeline_display",
+            "priority": "Medium",
+            "description": "Timeline and graph labels, fact descriptions, and explanations must be rendered in patient's preferred language from profile (BHASHINI_API_KEY for translation if needed).",
+            "status": "generated"
+          },
+          {
+            "name": "confidence_score_visibility",
+            "priority": "Medium",
+            "description": "Display extracted_facts.confidence_score alongside facts in timeline to indicate extraction reliability.",
+            "status": "generated"
+          }
+        ],
+        "validation_rules": []
+      },
+      {
+        "step_id": "2",
+        "description": "System queries extracted_facts, medications, and appointments to build graph nodes and edges",
+        "component_name": "KnowledgeGraphBuilder",
+        "component_path": "src/services/graph/KnowledgeGraphBuilder.ts",
+        "order": 2,
+        "business_rules": [
+          {
+            "name": "extracted_facts_query_validation",
+            "priority": "High",
+            "description": "System must query extracted_facts table filtered by patient context and verify all records have valid source_document_id references before building graph nodes.",
+            "status": "generated"
+          },
+          {
+            "name": "medications_query_enrichment",
+            "priority": "High",
+            "description": "System must query medications table and cross-reference with extracted_facts to identify medication nodes and prescription edges for graph construction.",
+            "status": "generated"
+          },
+          {
+            "name": "appointments_query_temporal_ordering",
+            "priority": "High",
+            "description": "System must query appointments table ordered by created_at and link to extracted_facts (consultations) to establish temporal edges and visit nodes in graph.",
+            "status": "generated"
+          },
+          {
+            "name": "graph_node_deduplication",
+            "priority": "Medium",
+            "description": "System must deduplicate graph nodes by fact_type and content hash to prevent duplicate nodes for same medication, condition, or visit across multiple documents.",
+            "status": "generated"
+          },
+          {
+            "name": "confidence_score_filtering",
+            "priority": "Medium",
+            "description": "System must filter extracted_facts by confidence_score threshold (minimum 0.70 recommended) before including in graph nodes to prioritize high-confidence extractions.",
+            "status": "generated"
+          },
+          {
+            "name": "source_document_traceability",
+            "priority": "High",
+            "description": "System must preserve source_document_id on every graph node and edge to enable patient traceability requirement from PRD (every fact traceable to document line).",
+            "status": "generated"
+          },
+          {
+            "name": "graph_edge_relationship_mapping",
+            "priority": "Medium",
+            "description": "System must map extracted_facts relationships (prescriptions, follow-ups, diagnoses) as directed edges between nodes based on fact_type and metadata relationships.",
+            "status": "generated"
+          },
+          {
+            "name": "null_or_empty_data_handling",
+            "priority": "Medium",
+            "description": "System must gracefully handle null or empty results from extracted_facts, medications, or appointments queries without crashing graph builder.",
+            "status": "generated"
+          }
+        ],
+        "validation_rules": []
+      },
+      {
+        "step_id": "3",
+        "description": "Patient views interactive knowledge graph with visits, doctors, medications, conditions, and tests as nodes",
+        "component_name": "KnowledgeGraphViewer",
+        "component_path": "src/components/patient/KnowledgeGraphViewer.tsx",
+        "order": 3,
+        "business_rules": [
+          {
+            "name": "knowledge_graph_data_availability",
+            "priority": "High",
+            "description": "Knowledge graph can only render if extracted_facts exist for the patient with fact_type in [visit, doctor, medication, condition, test] and confidence_score >= 0.7.",
+            "status": "generated"
+          },
+          {
+            "name": "graph_node_traceability",
+            "priority": "High",
+            "description": "Every node in the knowledge graph must be traceable to its source document via extracted_facts.source_document_id and documents.file_path.",
+            "status": "generated"
+          },
+          {
+            "name": "graph_rendering_performance",
+            "priority": "Medium",
+            "description": "Knowledge graph must render with max 500 nodes; if patient has >500 extracted facts, implement pagination or filtering by date range or fact_type.",
+            "status": "generated"
+          },
+          {
+            "name": "access_logging_for_graph_view",
+            "priority": "Medium",
+            "description": "Every time a patient views the knowledge graph, log the access event to access_logs with action='view_knowledge_graph' and resource='knowledge_graph'.",
+            "status": "generated"
+          },
+          {
+            "name": "multilingual_graph_labels",
+            "priority": "Medium",
+            "description": "Graph node labels and edge descriptions must be rendered in the patient's language preference (from patients profile or BHASHINI_API_KEY translation service).",
+            "status": "generated"
+          },
+          {
+            "name": "graph_edge_relationship_validation",
+            "priority": "Medium",
+            "description": "Edges between nodes (prescriptions, follow-ups) must only connect valid node pairs: medication→condition, visit→doctor, visit→test, visit→medication; invalid edges must not render.",
+            "status": "generated"
+          }
+        ],
+        "validation_rules": []
+      },
+      {
+        "step_id": "4",
+        "description": "Patient clicks on a node (e.g., medication) to see details and source document snippet",
+        "component_name": "FactDetailPanel",
+        "component_path": "src/components/patient/FactDetailPanel.tsx",
+        "order": 4,
+        "business_rules": [
+          {
+            "name": "fact_source_traceability",
+            "priority": "High",
+            "description": "Every extracted fact displayed in FactDetailPanel must be traceable to its source document and include the exact line/snippet from the original document.",
+            "status": "generated"
+          },
+          {
+            "name": "fact_confidence_display",
+            "priority": "Medium",
+            "description": "Display the confidence score (extracted_facts.confidence_score) alongside fact details to indicate extraction reliability.",
+            "status": "generated"
+          },
+          {
+            "name": "fact_type_specific_rendering",
+            "priority": "Medium",
+            "description": "Render fact details with type-specific formatting and context based on extracted_facts.fact_type (e.g., medication, diagnosis, test result, consultation).",
+            "status": "generated"
+          },
+          {
+            "name": "access_logging_for_fact_view",
+            "priority": "High",
+            "description": "Log every patient view of a fact detail (including source document snippet) to access_logs for audit trail and patient transparency.",
+            "status": "generated"
+          },
+          {
+            "name": "multilingual_fact_explanation",
+            "priority": "Medium",
+            "description": "Provide simple, multilingual explanations of medical facts using patient's language preference (from patient profile) via BHASHINI_API_KEY for translation if needed.",
+            "status": "generated"
+          }
+        ],
+        "validation_rules": []
+      },
+      {
+        "step_id": "5",
+        "description": "System displays the original document with the relevant line highlighted, powered by source_document_id and quoted snippet",
+        "component_name": "SourceDocumentViewer",
+        "component_path": "src/components/patient/SourceDocumentViewer.tsx",
+        "order": 5,
+        "business_rules": [
+          {
+            "name": "source_document_retrieval",
+            "priority": "High",
+            "description": "System must retrieve the original document using source_document_id from the extracted_facts record to display full context.",
+            "status": "generated"
+          },
+          {
+            "name": "snippet_highlighting_accuracy",
+            "priority": "High",
+            "description": "System must accurately locate and highlight the quoted snippet within the document content using case-sensitive substring matching or fuzzy matching if exact match fails.",
+            "status": "generated"
+          },
+          {
+            "name": "document_access_logging",
+            "priority": "High",
+            "description": "System must log every document view access to access_logs with user_id, resource identifier, and action='view' for audit trail transparency.",
+            "status": "generated"
+          },
+          {
+            "name": "document_content_integrity",
+            "priority": "Medium",
+            "description": "System must verify that the document version displayed matches the version from which the fact was extracted, using documents.version field.",
+            "status": "generated"
+          },
+          {
+            "name": "multimodal_document_rendering",
+            "priority": "Medium",
+            "description": "System must support rendering of both text-based documents (PDFs, text files) and image-based documents (scanned prescriptions, diagnostic reports) with appropriate viewer components.",
+            "status": "generated"
+          },
+          {
+            "name": "snippet_metadata_extraction",
+            "priority": "Medium",
+            "description": "System must extract and display snippet metadata (line number, character offset, or context) from extracted_facts.metadata to provide precise source location information.",
+            "status": "generated"
+          }
+        ],
+        "validation_rules": []
+      }
+    ]
+  },
+  {
+    "flow_id": "F003",
+    "name": "Conflict & Gap Detection",
+    "description": "System detects duplicate medications (via RxNorm normalization), conflicting prescriptions (via DDInter interaction table), and missed follow-up appointments, displaying red flags to the patient.",
+    "priority": "P1",
+    "priority_label": "High Use",
+    "steps": [
+      {
+        "step_id": "1",
+        "description": "System runs conflict detection after each document extraction or on-demand from patient dashboard",
+        "component_name": "ConflictDetectionEngine",
+        "component_path": "src/services/detection/ConflictDetectionEngine.ts",
+        "order": 1,
+        "business_rules": [
+          {
+            "name": "medication_interaction_detection",
+            "priority": "High",
+            "description": "System must detect drug-drug interactions between medications in extracted_facts by cross-referencing RxNorm and DDInter APIs to identify contraindicated combinations.",
+            "status": "generated"
+          },
+          {
+            "name": "temporal_consistency_validation",
+            "priority": "High",
+            "description": "System must validate that medication start/end dates, appointment dates, and test dates form a logically consistent timeline without contradictions (e.g., medication prescribed after patient death, test ordered before appointment).",
+            "status": "generated"
+          },
+          {
+            "name": "duplicate_fact_detection",
+            "priority": "Medium",
+            "description": "System must identify duplicate or near-duplicate extracted facts across multiple documents using content similarity and metadata matching to prevent redundant entries in the knowledge graph.",
+            "status": "generated"
+          },
+          {
+            "name": "dosage_range_validation",
+            "priority": "High",
+            "description": "System must validate extracted medication dosages against RxNorm standard ranges and openFDA_API_KEY adverse event thresholds to flag potentially unsafe or unusual doses.",
+            "status": "generated"
+          },
+          {
+            "name": "allergy_contraindication_check",
+            "priority": "High",
+            "description": "System must cross-reference extracted allergy facts against prescribed medications to detect contraindications using openFDA_API_KEY and DDInter data.",
+            "status": "generated"
+          },
+          {
+            "name": "confidence_score_threshold_enforcement",
+            "priority": "Medium",
+            "description": "System must flag extracted facts with confidence_score below configurable threshold (e.g., < 0.75) as requiring manual verification before inclusion in clinical timeline.",
+            "status": "generated"
+          },
+          {
+            "name": "document_source_traceability",
+            "priority": "High",
+            "description": "System must maintain and validate that every extracted fact references a valid source_document_id and can be traced back to the original document line/section for audit and verification purposes.",
+            "status": "generated"
+          }
+        ],
+        "validation_rules": []
+      },
+      {
+        "step_id": "2",
+        "description": "System queries medications table and normalizes drug names using RxNorm API to identify duplicates",
+        "component_name": "RxNormNormalizer",
+        "component_path": "src/services/rxnorm/RxNormNormalizer.ts",
+        "order": 2,
+        "business_rules": [
+          {
+            "name": "rxnorm_api_normalization",
+            "priority": "High",
+            "description": "All medication names extracted from documents must be normalized against RxNorm API (RXNORM_API_URL) to standardize drug nomenclature and enable duplicate detection.",
+            "status": "generated"
+          },
+          {
+            "name": "duplicate_medication_detection",
+            "priority": "High",
+            "description": "After RxNorm normalization, system must identify and flag duplicate medications (same normalized RxCUI or drug name) within a patient's medication history.",
+            "status": "generated"
+          },
+          {
+            "name": "normalization_confidence_threshold",
+            "priority": "Medium",
+            "description": "Normalized medications must meet a confidence threshold (extracted_facts.confidence_score >= 0.75) to be considered valid; lower-confidence normalizations are flagged for manual review.",
+            "status": "generated"
+          },
+          {
+            "name": "metadata_enrichment_on_normalization",
+            "priority": "Medium",
+            "description": "When RxNorm normalization succeeds, extracted_facts.metadata must be enriched with RxCUI, normalized drug name, and normalization timestamp for traceability.",
+            "status": "generated"
+          }
+        ],
+        "validation_rules": []
+      },
+      {
+        "step_id": "3",
+        "description": "System loads DDInter interaction table locally and checks all medication pairs for known conflicts",
+        "component_name": "DDInterChecker",
+        "component_path": "src/services/ddinter/DDInterChecker.ts",
+        "order": 3,
+        "business_rules": [
+          {
+            "name": "ddinter_table_load_and_cache",
+            "priority": "High",
+            "description": "System must load the DDInter medication interaction database locally into memory or cache before checking medication pairs to ensure fast, offline conflict detection.",
+            "status": "generated"
+          },
+          {
+            "name": "medication_pair_conflict_check",
+            "priority": "High",
+            "description": "System must systematically check all active medication pairs extracted from patient records against the locally loaded DDInter interaction table to identify known drug–drug interactions.",
+            "status": "generated"
+          },
+          {
+            "name": "conflict_severity_classification",
+            "priority": "High",
+            "description": "System must classify each detected medication interaction by severity level (e.g., contraindicated, major, moderate, minor) based on DDInter data to enable risk-based alerting.",
+            "status": "generated"
+          },
+          {
+            "name": "conflict_alert_generation",
+            "priority": "High",
+            "description": "System must generate and persist conflict alerts for all detected medication interactions, storing severity, affected medications, and clinical recommendation.",
+            "status": "generated"
+          },
+          {
+            "name": "medication_extraction_validation",
+            "priority": "High",
+            "description": "System must validate that extracted medications have sufficient identifiers (name, RxNorm code, or NDC) to enable reliable DDInter lookup.",
+            "status": "generated"
+          },
+          {
+            "name": "duplicate_conflict_deduplication",
+            "priority": "Medium",
+            "description": "System must deduplicate conflict alerts when the same medication pair is detected multiple times across different documents or extractions.",
+            "status": "generated"
+          },
+          {
+            "name": "ddinter_data_freshness_monitoring",
+            "priority": "Medium",
+            "description": "System must track the age of the locally loaded DDInter table and alert administrators if data becomes stale (e.g., older than 30 days).",
+            "status": "generated"
+          },
+          {
+            "name": "conflict_check_audit_logging",
+            "priority": "Medium",
+            "description": "System must log all medication conflict checks, including medications checked, conflicts found, and timestamp, for audit and compliance purposes.",
+            "status": "generated"
+          }
+        ],
+        "validation_rules": []
+      },
+      {
+        "step_id": "4",
+        "description": "System queries appointments table to identify overdue follow-ups with no subsequent visit",
+        "component_name": "FollowUpGapDetector",
+        "component_path": "src/services/detection/FollowUpGapDetector.ts",
+        "order": 4,
+        "business_rules": [
+          {
+            "name": "overdue_followup_detection",
+            "priority": "High",
+            "description": "System must identify appointments with follow-up recommendations that have exceeded their recommended follow-up window without a subsequent visit recorded in the appointments table.",
+            "status": "generated"
+          },
+          {
+            "name": "gap_identification_criteria",
+            "priority": "High",
+            "description": "A follow-up gap exists when an appointment has extracted follow-up recommendation metadata but no subsequent appointment record exists within the recommended timeframe.",
+            "status": "generated"
+          },
+          {
+            "name": "no_subsequent_visit_validation",
+            "priority": "High",
+            "description": "System must confirm absence of any subsequent appointment record for the patient after the original appointment date to validate gap status.",
+            "status": "generated"
+          },
+          {
+            "name": "gap_result_persistence",
+            "priority": "Medium",
+            "description": "Detected follow-up gaps must be persisted as flag records or audit entries for downstream alerting and reporting. [schema: add patient_id, appointment_id, gap_type, recommended_date, detected_at to flags or new model]",
+            "status": "generated"
+          },
+          {
+            "name": "data_freshness_requirement",
+            "priority": "Medium",
+            "description": "Gap detection must operate on appointments and extracted_facts data no older than 24 hours to ensure timely identification of overdue follow-ups.",
+            "status": "generated"
+          }
+        ],
+        "validation_rules": []
+      },
+      {
+        "step_id": "5",
+        "description": "System stores detected flags in flags table with description and triggering facts",
+        "component_name": "FlagLogger",
+        "component_path": "src/services/flags/FlagLogger.ts",
+        "order": 5,
+        "business_rules": [
+          {
+            "name": "flag_uniqueness_by_key",
+            "priority": "High",
+            "description": "Each flag must have a unique key within the flags table to prevent duplicate conflict/gap detection entries.",
+            "status": "generated"
+          },
+          {
+            "name": "flag_description_traceability",
+            "priority": "High",
+            "description": "Flag description must include reference to triggering facts (source_document_id and fact_type from extracted_facts) to maintain traceability per PRD requirement.",
+            "status": "generated"
+          },
+          {
+            "name": "flag_enabled_status_initialization",
+            "priority": "Medium",
+            "description": "New flags must be created with enabled=true by default to ensure detected conflicts/gaps are immediately visible to patients and doctors.",
+            "status": "generated"
+          },
+          {
+            "name": "flag_environment_context",
+            "priority": "Medium",
+            "description": "Flag environment field must be set to current deployment environment (development, staging, production) to segregate detection results by environment.",
+            "status": "generated"
+          },
+          {
+            "name": "flag_timestamp_audit",
+            "priority": "Medium",
+            "description": "Flag created_at and updated_at timestamps must be automatically set by the database to maintain immutable audit trail of when conflicts/gaps were detected.",
+            "status": "generated"
+          },
+          {
+            "name": "conflict_detection_via_drug_interaction_api",
+            "priority": "High",
+            "description": "When flag type is 'drug_interaction', FlagLogger must validate detected conflicts against DDInter API before storing to ensure accuracy.",
+            "status": "generated"
+          },
+          {
+            "name": "gap_detection_appointment_medication_alignment",
+            "priority": "High",
+            "description": "When flag type is 'medication_gap', FlagLogger must verify gap exists by cross-referencing extracted_facts medication dates against appointments table to confirm no follow-up prescription exists.",
+            "status": "generated"
+          }
+        ],
+        "validation_rules": []
+      },
+      {
+        "step_id": "6",
+        "description": "Patient views red flags on dashboard: duplicate medicines, drug conflicts, overdue follow-ups",
+        "component_name": "RedFlagsPanel",
+        "component_path": "src/components/patient/RedFlagsPanel.tsx",
+        "order": 6,
+        "business_rules": [
+          {
+            "name": "duplicate_medication_detection",
+            "priority": "High",
+            "description": "System must identify and flag medications with identical active ingredients or therapeutic equivalents prescribed within overlapping timeframes across multiple documents.",
+            "status": "generated"
+          },
+          {
+            "name": "drug_interaction_conflict_detection",
+            "priority": "High",
+            "description": "System must query drug interaction database (DDInter or openFDA via OPENFDA_API_KEY) to identify contraindicated medication combinations and flag severity levels.",
+            "status": "generated"
+          },
+          {
+            "name": "overdue_followup_detection",
+            "priority": "High",
+            "description": "System must compare extracted follow-up appointment dates from documents against current date and flag any appointments past their scheduled date or without confirmation.",
+            "status": "generated"
+          },
+          {
+            "name": "red_flag_confidence_filtering",
+            "priority": "Medium",
+            "description": "System must only display red flags derived from extracted_facts with confidence_score >= 0.7; lower-confidence flags marked as 'unverified' and hidden by default.",
+            "status": "generated"
+          },
+          {
+            "name": "red_flag_source_traceability",
+            "priority": "Medium",
+            "description": "Each red flag must link back to the source document and specific extracted_fact via source_document_id, enabling patient to verify the flag's origin.",
+            "status": "generated"
+          },
+          {
+            "name": "multilingual_flag_presentation",
+            "priority": "Medium",
+            "description": "Red flag descriptions and explanations must be translated to patient's language preference (via Bhashini API using BHASHINI_API_KEY and BHASHINI_USER_ID) before display.",
+            "status": "generated"
+          },
+          {
+            "name": "red_flag_access_logging",
+            "priority": "Medium",
+            "description": "Every time a patient views the RedFlagsPanel, an access_log entry must be created with action='view_red_flags' and resource='red_flags_panel'.",
+            "status": "generated"
+          }
+        ],
+        "validation_rules": []
+      }
+    ]
+  },
+  {
+    "flow_id": "F004",
+    "name": "Patient Generates OTP for Doctor Access",
+    "description": "Patient generates a 6-digit OTP to grant a doctor time-limited (30-minute) access to their medical record with full consent and audit logging.",
+    "priority": "P1",
+    "priority_label": "High Use",
+    "steps": [
+      {
+        "step_id": "1",
+        "description": "Patient navigates to 'Grant Doctor Access' section in their portal",
+        "component_name": "PatientDashboard",
+        "component_path": "src/components/patient/PatientDashboard.tsx",
+        "order": 1,
+        "business_rules": [
+          {
+            "name": "otp_generation_initiation",
+            "priority": "High",
+            "description": "When a patient navigates to 'Grant Doctor Access', the system must initiate OTP generation for doctor access consent, ensuring each OTP is unique, time-limited, and logged for audit purposes.",
+            "status": "generated"
+          },
+          {
+            "name": "otp_validity_window",
+            "priority": "High",
+            "description": "Generated OTP must expire after a fixed time window (typically 10-15 minutes) to prevent unauthorized access from intercepted codes. [schema: add otp_expires_at to access_logs or new otp_tokens model]",
+            "status": "generated"
+          },
+          {
+            "name": "otp_single_use_enforcement",
+            "priority": "High",
+            "description": "Each generated OTP can only be used once; after successful authentication, the OTP is invalidated to prevent replay attacks. [schema: add used flag to otp_tokens model]",
+            "status": "generated"
+          },
+          {
+            "name": "access_consent_audit_trail",
+            "priority": "High",
+            "description": "Every OTP generation and doctor access attempt must be logged in access_logs with timestamp, user_id, action, and IP address for patient visibility and compliance.",
+            "status": "generated"
+          },
+          {
+            "name": "doctor_identifier_validation",
+            "priority": "High",
+            "description": "Patient must provide a valid doctor identifier (email, phone, or doctor ID) before OTP is generated; system validates identifier exists in doctor registry. [schema: add doctors model with id, email, phone fields]",
+            "status": "generated"
+          }
+        ],
+        "validation_rules": [
+          {
+            "field_name": "doctor_identifier",
+            "description": "Doctor identifier (email, phone, or ID) must be provided and non-empty.",
+            "status": "generated"
+          },
+          {
+            "field_name": "doctor_identifier",
+            "description": "Doctor identifier must match email format (if email) or valid phone/ID pattern.",
+            "status": "generated"
+          },
+          {
+            "field_name": "access_reason",
+            "description": "Patient should optionally provide reason for granting access (e.g., 'consultation', 'second opinion') for audit clarity. [schema: add access_reason to access_logs]",
+            "status": "generated"
+          }
+        ]
+      },
+      {
+        "step_id": "2",
+        "description": "Patient clicks 'Generate OTP' button",
+        "component_name": "OTPGenerationPanel",
+        "component_path": "src/components/patient/OTPGenerationPanel.tsx",
+        "order": 2,
+        "business_rules": [
+          {
+            "name": "otp_generation_initiation",
+            "priority": "High",
+            "description": "When patient clicks 'Generate OTP', system must create a time-limited OTP token (valid for 10 minutes) and associate it with the patient's ID for doctor access authorization.",
+            "status": "generated"
+          },
+          {
+            "name": "otp_access_logging",
+            "priority": "High",
+            "description": "Every OTP generation event must be logged in access_logs with action='otp_generated' for patient transparency and audit trail.",
+            "status": "generated"
+          },
+          {
+            "name": "otp_uniqueness_per_session",
+            "priority": "Medium",
+            "description": "Only one active OTP per patient session is allowed; generating a new OTP invalidates any previously active OTP for that patient.",
+            "status": "generated"
+          },
+          {
+            "name": "otp_notification_delivery",
+            "priority": "Medium",
+            "description": "After OTP generation, system must send OTP to patient via push notification using NTFY_TOPIC env var and optionally via email/SMS if configured.",
+            "status": "generated"
+          }
+        ],
+        "validation_rules": []
+      },
+      {
+        "step_id": "3",
+        "description": "System generates a 6-digit OTP and stores it with 30-minute expiration",
+        "component_name": "OTPService",
+        "component_path": "src/services/auth/OTPService.ts",
+        "order": 3,
+        "business_rules": [
+          {
+            "name": "otp_generation_and_storage",
+            "priority": "High",
+            "description": "System must generate a cryptographically secure 6-digit OTP and store it with a 30-minute expiration timestamp for doctor access verification.",
+            "status": "generated"
+          },
+          {
+            "name": "otp_expiration_enforcement",
+            "priority": "High",
+            "description": "OTP must be invalidated after 30 minutes; any authentication attempt with an expired OTP must be rejected.",
+            "status": "generated"
+          },
+          {
+            "name": "otp_single_use_enforcement",
+            "priority": "High",
+            "description": "Each OTP must be usable only once; after successful authentication, the OTP must be marked as consumed and rejected for subsequent use.",
+            "status": "generated"
+          },
+          {
+            "name": "otp_audit_trail_logging",
+            "priority": "High",
+            "description": "Every OTP generation and consumption event must be logged to access_logs with timestamp, patient ID, and doctor ID for patient transparency.",
+            "status": "generated"
+          },
+          {
+            "name": "otp_delivery_notification",
+            "priority": "High",
+            "description": "Generated OTP must be delivered to the patient via push notification using NTFY_TOPIC to ensure patient awareness of access request.",
+            "status": "generated"
+          }
+        ],
+        "validation_rules": []
+      },
+      {
+        "step_id": "4",
+        "description": "Patient sees the OTP displayed and shares it with the doctor",
+        "component_name": "OTPDisplayPanel",
+        "component_path": "src/components/patient/OTPDisplayPanel.tsx",
+        "order": 4,
+        "business_rules": [
+          {
+            "name": "otp_display_and_sharing",
+            "priority": "High",
+            "description": "Patient must be able to view the generated OTP and share it with the doctor for access authorization.",
+            "status": "generated"
+          },
+          {
+            "name": "otp_visibility_and_copy_mechanism",
+            "priority": "High",
+            "description": "OTP must be clearly visible and easily copyable/shareable by the patient (e.g., copy-to-clipboard button, QR code, or manual sharing).",
+            "status": "generated"
+          },
+          {
+            "name": "otp_expiration_warning",
+            "priority": "High",
+            "description": "Display remaining time until OTP expires and warn patient when expiration is imminent (e.g., < 5 minutes remaining).",
+            "status": "generated"
+          },
+          {
+            "name": "access_logging_on_otp_display",
+            "priority": "Medium",
+            "description": "Log the event that patient viewed/displayed the OTP for audit and transparency purposes. [schema: add otp_id to access_logs]",
+            "status": "generated"
+          }
+        ],
+        "validation_rules": []
+      },
+      {
+        "step_id": "5",
+        "description": "Patient can view the access log showing all doctors who have accessed their record with timestamps and session duration",
+        "component_name": "AccessLogViewer",
+        "component_path": "src/components/patient/AccessLogViewer.tsx",
+        "order": 5,
+        "business_rules": [
+          {
+            "name": "access_log_retrieval_authorization",
+            "priority": "High",
+            "description": "Only the patient who owns the record can view their access log; doctors and other users must be denied access.",
+            "status": "generated"
+          },
+          {
+            "name": "access_log_completeness",
+            "priority": "High",
+            "description": "Every doctor access to a patient record must be logged with timestamp, session duration, and OTP verification status.",
+            "status": "generated"
+          },
+          {
+            "name": "session_duration_calculation",
+            "priority": "Medium",
+            "description": "Session duration must be calculated as the time elapsed between access_logs.created_at and the session end time (logout or timeout). [schema: add session_end_time to access_logs]",
+            "status": "generated"
+          },
+          {
+            "name": "access_log_immutability",
+            "priority": "High",
+            "description": "Access log entries must be immutable; no updates or deletions allowed after creation.",
+            "status": "generated"
+          },
+          {
+            "name": "access_log_sorting_and_filtering",
+            "priority": "Medium",
+            "description": "AccessLogViewer must display access logs sorted by created_at in descending order (most recent first) and support filtering by doctor name, action type, or date range.",
+            "status": "generated"
+          },
+          {
+            "name": "otp_verification_status_display",
+            "priority": "High",
+            "description": "Each access log entry must indicate whether the doctor's access was OTP-verified; only OTP-verified accesses are permitted.",
+            "status": "generated"
+          }
+        ],
+        "validation_rules": []
+      }
+    ]
+  },
+  {
+    "flow_id": "F005",
+    "name": "Doctor Accesses Patient Record via OTP",
+    "description": "Doctor enters patient ID and OTP to open a 30-minute session, reads AI-generated clinical summary with source-traced facts, and browses the full timeline and graph.",
+    "priority": "P1",
+    "priority_label": "High Use",
+    "steps": [
+      {
+        "step_id": "1",
+        "description": "Doctor navigates to doctor portal login page",
+        "component_name": "DoctorLoginPage",
+        "component_path": "src/components/doctor/DoctorLoginPage.tsx",
+        "order": 1,
+        "business_rules": [
+          {
+            "name": "doctor_otp_authentication_required",
+            "priority": "High",
+            "description": "Doctor must authenticate using patient ID and a valid 6-digit OTP before accessing any patient record; OTP must be generated and sent to patient for consent.",
+            "status": "generated"
+          },
+          {
+            "name": "access_logging_on_doctor_login",
+            "priority": "High",
+            "description": "Every successful doctor login to a patient record must be logged with timestamp, doctor user_id, patient resource identifier, and action type for patient audit trail.",
+            "status": "generated"
+          },
+          {
+            "name": "doctor_role_validation",
+            "priority": "High",
+            "description": "Login response must include role='doctor' to distinguish doctor authentication from patient authentication and enforce role-based access control.",
+            "status": "generated"
+          }
+        ],
+        "validation_rules": [
+          {
+            "field_name": "patient_id",
+            "description": "Patient ID must be provided and non-empty to identify which patient record the doctor is requesting access to.",
+            "status": "generated"
+          },
+          {
+            "field_name": "otp",
+            "description": "OTP must be exactly 6 digits (numeric only).",
+            "status": "generated"
+          },
+          {
+            "field_name": "otp",
+            "description": "OTP must be provided; cannot be null or empty.",
+            "status": "generated"
+          }
+        ]
+      },
+      {
+        "step_id": "2",
+        "description": "Doctor enters patient ID and 6-digit OTP",
+        "component_name": "OTPVerificationForm",
+        "component_path": "src/components/doctor/OTPVerificationForm.tsx",
+        "order": 2,
+        "business_rules": [
+          {
+            "name": "otp_verification_required",
+            "priority": "High",
+            "description": "Doctor must provide a valid 6-digit OTP to access any patient record; OTP is the consent mechanism that allows patient to see who accessed their data.",
+            "status": "generated"
+          },
+          {
+            "name": "access_logging_on_otp_success",
+            "priority": "High",
+            "description": "Upon successful OTP verification, log the doctor's access to the patient record in access_logs so the patient can see who accessed their data and when.",
+            "status": "generated"
+          },
+          {
+            "name": "patient_id_format_validation",
+            "priority": "High",
+            "description": "Patient ID must be a valid UUID format matching an existing patient record in the patients table.",
+            "status": "generated"
+          },
+          {
+            "name": "otp_expiration_enforcement",
+            "priority": "High",
+            "description": "OTP must not be expired; typical expiration window is 10 minutes from generation. [schema: add otp_expires_at to a user_sessions or otp_tokens model]",
+            "status": "generated"
+          },
+          {
+            "name": "otp_attempt_rate_limiting",
+            "priority": "High",
+            "description": "Limit OTP verification attempts to prevent brute-force attacks; lock after 5 failed attempts for 15 minutes. [schema: add failed_otp_attempts and locked_until to a user_sessions or otp_tokens model]",
+            "status": "generated"
+          }
+        ],
+        "validation_rules": [
+          {
+            "field_name": "patient_id",
+            "description": "Patient ID must be a valid UUID (36 characters, hyphenated format).",
+            "status": "generated"
+          },
+          {
+            "field_name": "patient_id",
+            "description": "Patient ID field must not be empty.",
+            "status": "generated"
+          },
+          {
+            "field_name": "otp",
+            "description": "OTP field must not be empty.",
+            "status": "generated"
+          },
+          {
+            "field_name": "otp",
+            "description": "OTP must be exactly 6 digits (numeric only).",
+            "status": "generated"
+          },
+          {
+            "field_name": "otp",
+            "description": "OTP length must be exactly 6 characters.",
+            "status": "generated"
+          }
+        ]
+      },
+      {
+        "step_id": "3",
+        "description": "System validates OTP against stored value and checks expiration; creates access session with 30-minute timeout",
+        "component_name": "OTPValidator",
+        "component_path": "src/services/auth/OTPValidator.ts",
+        "order": 3,
+        "business_rules": [
+          {
+            "name": "otp_validation_check",
+            "priority": "High",
+            "description": "System must validate that the provided OTP matches the stored OTP value for the doctor-patient pair before granting access.",
+            "status": "generated"
+          },
+          {
+            "name": "otp_expiration_check",
+            "priority": "High",
+            "description": "System must verify that the OTP has not expired before granting access; OTP validity window must be enforced.",
+            "status": "generated"
+          },
+          {
+            "name": "access_session_creation_30min_timeout",
+            "priority": "High",
+            "description": "System must create an access session with exactly 30-minute timeout upon successful OTP validation; session must be tied to doctor, patient, and timestamp.",
+            "status": "generated"
+          },
+          {
+            "name": "access_logging_for_patient_visibility",
+            "priority": "High",
+            "description": "System must log every doctor access to a patient record in access_logs so the patient can see who accessed their records and when.",
+            "status": "generated"
+          },
+          {
+            "name": "session_expiration_enforcement",
+            "priority": "High",
+            "description": "System must invalidate the access session after 30 minutes; subsequent requests with expired session token must be rejected.",
+            "status": "generated"
+          }
+        ],
+        "validation_rules": [
+          {
+            "field_name": "otp",
+            "description": "OTP must be exactly 6 digits (numeric only).",
+            "status": "generated"
+          },
+          {
+            "field_name": "patient_id",
+            "description": "Patient ID must be provided and must be a valid UUID.",
+            "status": "generated"
+          },
+          {
+            "field_name": "otp",
+            "description": "OTP code must be provided in the request.",
+            "status": "generated"
+          }
+        ]
+      },
+      {
+        "step_id": "4",
+        "description": "System logs the access event in access_logs table with doctor user_id, patient resource, timestamp, and IP address",
+        "component_name": "AccessLogger",
+        "component_path": "src/services/audit/AccessLogger.ts",
+        "order": 4,
+        "business_rules": [
+          {
+            "name": "access_log_creation_on_otp_auth",
+            "priority": "High",
+            "description": "When a doctor successfully authenticates via OTP to access a patient record, an access log entry must be created immediately with doctor user_id, patient resource identifier, timestamp, and IP address.",
+            "status": "generated"
+          },
+          {
+            "name": "access_log_immutability",
+            "priority": "High",
+            "description": "Access log entries must be immutable after creation; no updates or deletions are permitted to maintain audit trail integrity.",
+            "status": "generated"
+          },
+          {
+            "name": "ip_address_capture_requirement",
+            "priority": "High",
+            "description": "IP address must be captured from the HTTP request context (X-Forwarded-For header or socket.remoteAddress) at the time of OTP authentication and stored in access_logs.ip_address.",
+            "status": "generated"
+          },
+          {
+            "name": "resource_identifier_specificity",
+            "priority": "High",
+            "description": "The access_logs.resource field must contain the specific patient identifier (patient ID or patient resource path) being accessed, not a generic label.",
+            "status": "generated"
+          },
+          {
+            "name": "action_type_classification",
+            "priority": "Medium",
+            "description": "The access_logs.action field must be set to 'READ' or 'VIEW' to classify the type of access performed by the doctor.",
+            "status": "generated"
+          },
+          {
+            "name": "timestamp_accuracy",
+            "priority": "High",
+            "description": "The access_logs.created_at timestamp must be set to the exact moment of OTP verification completion using server time (UTC), not client time.",
+            "status": "generated"
+          },
+          {
+            "name": "user_id_validation_for_doctor",
+            "priority": "High",
+            "description": "The access_logs.user_id must correspond to a valid doctor user account (not a patient account) to ensure only authorized medical professionals are logged.",
+            "status": "generated"
+          },
+          {
+            "name": "patient_notification_on_access",
+            "priority": "High",
+            "description": "When an access log is created, the patient must be notified of the doctor's access via push notification (NTFY_TOPIC) with timestamp and doctor identifier.",
+            "status": "generated"
+          }
+        ],
+        "validation_rules": []
+      },
+      {
+        "step_id": "5",
+        "description": "Doctor views AI-generated ~10-line clinical summary of patient history",
+        "component_name": "ClinicalSummaryPanel",
+        "component_path": "src/components/doctor/ClinicalSummaryPanel.tsx",
+        "order": 5,
+        "business_rules": [
+          {
+            "name": "clinical_summary_generation_from_extracted_facts",
+            "priority": "High",
+            "description": "AI-generated clinical summary (~10 lines) must be synthesized from extracted_facts records linked to the patient's documents using OPENAI_API_KEY, with each summary statement traceable to source document line.",
+            "status": "generated"
+          },
+          {
+            "name": "access_logging_for_record_view",
+            "priority": "High",
+            "description": "Every doctor view of a patient record must be logged to access_logs with user_id, resource (patient ID), action ('view_clinical_summary'), timestamp, and IP address for patient audit trail.",
+            "status": "generated"
+          },
+          {
+            "name": "fact_confidence_filtering_for_display",
+            "priority": "Medium",
+            "description": "Clinical summary should prioritize extracted_facts with confidence_score >= 0.7; facts below 0.7 may be included but marked as 'lower confidence' or footnoted.",
+            "status": "generated"
+          },
+          {
+            "name": "document_source_traceability",
+            "priority": "High",
+            "description": "Each clinical summary statement must include a clickable reference to its source document (documents.id, documents.title) so doctor can verify facts against original.",
+            "status": "generated"
+          }
+        ],
+        "validation_rules": []
+      },
+      {
+        "step_id": "6",
+        "description": "Doctor clicks on any fact in the summary to see its source snippet from the original document",
+        "component_name": "SourceLedgerViewer",
+        "component_path": "src/components/doctor/SourceLedgerViewer.tsx",
+        "order": 6,
+        "business_rules": [
+          {
+            "name": "source_snippet_traceability",
+            "priority": "High",
+            "description": "Every extracted fact displayed in the summary must be traceable to its original source document line, enabling doctors to verify AI-extracted information against the raw document.",
+            "status": "generated"
+          },
+          {
+            "name": "access_logging_on_source_view",
+            "priority": "High",
+            "description": "Log every doctor's access to patient source documents and extracted facts in access_logs, enabling patients to see who accessed their records and when.",
+            "status": "generated"
+          },
+          {
+            "name": "fact_source_metadata_validation",
+            "priority": "High",
+            "description": "Verify that extracted_facts.metadata contains valid source location data (e.g., page number, line range, or character offset) to pinpoint the exact snippet in the original document.",
+            "status": "generated"
+          },
+          {
+            "name": "document_version_consistency",
+            "priority": "Medium",
+            "description": "Ensure the source document version referenced by extracted_facts matches the current document version to prevent stale or misaligned source snippets.",
+            "status": "generated"
+          },
+          {
+            "name": "extraction_confidence_display",
+            "priority": "Medium",
+            "description": "Display the confidence_score of each extracted fact alongside its source snippet to help doctors assess AI extraction reliability.",
+            "status": "generated"
+          },
+          {
+            "name": "otp_authenticated_access_only",
+            "priority": "High",
+            "description": "Ensure that only doctors who have successfully authenticated via OTP can access the SourceLedgerViewer and view patient source documents.",
+            "status": "generated"
+          }
+        ],
+        "validation_rules": []
+      },
+      {
+        "step_id": "7",
+        "description": "Doctor browses full timeline and knowledge graph of patient history",
+        "component_name": "DoctorTimelineViewer",
+        "component_path": "src/components/doctor/DoctorTimelineViewer.tsx",
+        "order": 7,
+        "business_rules": [
+          {
+            "name": "timeline_data_retrieval_authorization",
+            "priority": "High",
+            "description": "Doctor can only view patient timeline and knowledge graph after successful OTP authentication; access must be verified against current session token.",
+            "status": "generated"
+          },
+          {
+            "name": "timeline_chronological_ordering",
+            "priority": "High",
+            "description": "Patient timeline events (consultations, medications, tests, treatments) must be sorted chronologically by extracted fact creation date and document date metadata.",
+            "status": "generated"
+          },
+          {
+            "name": "knowledge_graph_node_relationship_integrity",
+            "priority": "High",
+            "description": "Knowledge graph nodes (visits, doctors, medications, conditions, tests) and edges (prescriptions, follow-ups) must maintain referential integrity; all node IDs must reference valid extracted_facts or related entities.",
+            "status": "generated"
+          },
+          {
+            "name": "fact_traceability_to_source_document",
+            "priority": "High",
+            "description": "Every extracted fact displayed in timeline or knowledge graph must be traceable to its source document line; extracted_facts.source_document_id must reference valid documents record and metadata must contain line reference.",
+            "status": "generated"
+          },
+          {
+            "name": "confidence_score_display_and_filtering",
+            "priority": "Medium",
+            "description": "Extracted facts must display confidence_score; facts with score below 0.70 should be visually flagged or filterable; doctor can toggle low-confidence facts visibility.",
+            "status": "generated"
+          },
+          {
+            "name": "access_logging_for_audit_trail",
+            "priority": "High",
+            "description": "Every doctor access to patient timeline/knowledge graph must be logged to access_logs with user_id, action='view_timeline', resource=patient_id, and timestamp; patient can later view this log.",
+            "status": "generated"
+          },
+          {
+            "name": "multilingual_fact_display",
+            "priority": "Medium",
+            "description": "Extracted facts and timeline labels must be displayed in doctor's preferred language or patient's language if available; use BHASHINI_API_KEY for translation if needed.",
+            "status": "generated"
+          },
+          {
+            "name": "document_version_consistency",
+            "priority": "Medium",
+            "description": "Timeline and knowledge graph must display facts extracted from the latest version of each document; if document.version > 1, facts from older versions should be marked as 'superseded' or hidden.",
+            "status": "generated"
+          },
+          {
+            "name": "graph_performance_and_rendering_limits",
+            "priority": "Medium",
+            "description": "Knowledge graph rendering must handle large patient histories (100+ facts) without performance degradation; implement pagination, lazy-loading, or clustering for nodes/edges.",
+            "status": "generated"
+          }
+        ],
+        "validation_rules": []
+      },
+      {
+        "step_id": "8",
+        "description": "Session expires after 30 minutes; doctor is logged out and access is recorded in access_logs",
+        "component_name": "SessionManager",
+        "component_path": "src/services/auth/SessionManager.ts",
+        "order": 8,
+        "business_rules": [
+          {
+            "name": "session_expiration_enforcement",
+            "priority": "High",
+            "description": "Session must automatically expire and terminate after exactly 30 minutes of creation, forcing re-authentication via OTP.",
+            "status": "generated"
+          },
+          {
+            "name": "access_logging_on_session_termination",
+            "priority": "High",
+            "description": "Every session expiration and logout must create an immutable audit log entry recording doctor ID, timestamp, and termination reason in access_logs.",
+            "status": "generated"
+          },
+          {
+            "name": "session_token_invalidation",
+            "priority": "High",
+            "description": "Expired session token must be immediately invalidated in the session store and all subsequent requests using that token must be rejected.",
+            "status": "generated"
+          },
+          {
+            "name": "doctor_logout_on_expiration",
+            "priority": "High",
+            "description": "When session expires, doctor must be logged out completely and redirected to re-authenticate; no background access permitted.",
+            "status": "generated"
+          }
+        ],
+        "validation_rules": []
+      }
+    ]
+  },
+  {
+    "flow_id": "F006",
+    "name": "Multilingual Prescription Explanation",
+    "description": "Patient taps a prescription or medical term to receive a plain-language explanation in their chosen language using Bhashini API with LLM fallback.",
+    "priority": "P2",
+    "priority_label": "Moderate Use",
+    "steps": [
+      {
+        "step_id": "1",
+        "description": "Patient views their medications or timeline and taps on a prescription or medical term",
+        "component_name": "MedicationListView",
+        "component_path": "src/components/patient/MedicationListView.tsx",
+        "order": 1,
+        "business_rules": [
+          {
+            "name": "medication_selection_tracking",
+            "priority": "High",
+            "description": "When a patient taps on a prescription or medical term, the system must record which medication or term was selected to enable multilingual explanation generation.",
+            "status": "generated"
+          },
+          {
+            "name": "source_document_traceability",
+            "priority": "High",
+            "description": "Every medication or medical term displayed must be traceable to its source document via extracted_facts.source_document_id to maintain transparency and accountability as per PRD.",
+            "status": "generated"
+          },
+          {
+            "name": "multilingual_explanation_generation",
+            "priority": "High",
+            "description": "When a medication or medical term is selected, the system must generate a simple multilingual explanation using the patient's language preference and Bhashini translation API (BHASHINI_API_KEY, BHASHINI_USER_ID).",
+            "status": "generated"
+          },
+          {
+            "name": "access_logging_for_medication_view",
+            "priority": "Medium",
+            "description": "Every time a patient views medication details or medical term explanations, log the access event to access_logs for audit trail and patient transparency.",
+            "status": "generated"
+          },
+          {
+            "name": "fact_confidence_display",
+            "priority": "Medium",
+            "description": "Display the confidence_score from extracted_facts to indicate the reliability of AI-extracted medication or medical term information.",
+            "status": "generated"
+          }
+        ],
+        "validation_rules": []
+      },
+      {
+        "step_id": "2",
+        "description": "Patient selects their preferred language from dropdown (22 Indian languages supported)",
+        "component_name": "LanguageSelector",
+        "component_path": "src/components/patient/LanguageSelector.tsx",
+        "order": 2,
+        "business_rules": [
+          {
+            "name": "language_preference_persistence",
+            "priority": "High",
+            "description": "Patient's language selection must be persisted to their profile and used for all subsequent multilingual content delivery including prescription explanations and UI rendering.",
+            "status": "generated"
+          },
+          {
+            "name": "bhashini_language_support_validation",
+            "priority": "High",
+            "description": "Only languages supported by Bhashini API and the 22 Indian languages list may be selected; unsupported selections must be rejected before API calls.",
+            "status": "generated"
+          },
+          {
+            "name": "language_dropdown_population",
+            "priority": "High",
+            "description": "LanguageSelector dropdown must be populated with exactly 22 Indian languages; list must be fetched from configuration or hardcoded with fallback to English.",
+            "status": "generated"
+          },
+          {
+            "name": "language_selection_audit_logging",
+            "priority": "Medium",
+            "description": "Every language selection change must be logged to access_logs for audit trail and patient transparency.",
+            "status": "generated"
+          }
+        ],
+        "validation_rules": [
+          {
+            "field_name": "language",
+            "description": "Language selection is mandatory; patient must choose one of 22 supported Indian languages.",
+            "status": "generated"
+          },
+          {
+            "field_name": "language",
+            "description": "Selected language must be one of the 22 supported Indian languages (e.g., Hindi, Tamil, Telugu, Kannada, Malayalam, Marathi, Gujarati, Bengali, Punjabi, Odia, Assamese, Urdu, Konkani, Manipuri, Nepali, Santali, Sindhi, Maithili, Dogri, Bodo, Kashmiri, English).",
+            "status": "generated"
+          }
+        ]
+      },
+      {
+        "step_id": "3",
+        "description": "System calls Bhashini API to translate and explain the prescription in simple language",
+        "component_name": "BhashiniTranslator",
+        "component_path": "src/services/translation/BhashiniTranslator.ts",
+        "order": 3,
+        "business_rules": [
+          {
+            "name": "bhashini_api_authentication",
+            "priority": "High",
+            "description": "Bhashini API calls must be authenticated using BHASHINI_API_KEY and BHASHINI_USER_ID environment variables before translation requests are sent.",
+            "status": "generated"
+          },
+          {
+            "name": "prescription_content_validation_before_translation",
+            "priority": "High",
+            "description": "Prescription content must be extracted and validated from extracted_facts before being sent to Bhashini API for translation.",
+            "status": "generated"
+          },
+          {
+            "name": "language_preference_detection",
+            "priority": "High",
+            "description": "Target language for translation must be determined from patient's language preference or explicitly specified in the request.",
+            "status": "generated"
+          },
+          {
+            "name": "translation_output_simplification",
+            "priority": "High",
+            "description": "Bhashini translation output must be post-processed to ensure medical terminology is simplified into patient-friendly language.",
+            "status": "generated"
+          },
+          {
+            "name": "translation_caching_for_performance",
+            "priority": "Medium",
+            "description": "Identical prescription translations for the same language should be cached to reduce API calls and improve response time. [schema: add translation_cache table with fields: prescription_hash, language, translated_content, created_at]",
+            "status": "generated"
+          },
+          {
+            "name": "translation_error_fallback",
+            "priority": "Medium",
+            "description": "If Bhashini API fails or times out, the system must fall back to the original prescription content or a cached version.",
+            "status": "generated"
+          },
+          {
+            "name": "audit_logging_for_translation_requests",
+            "priority": "Medium",
+            "description": "All translation requests and responses must be logged to access_logs for audit and compliance purposes.",
+            "status": "generated"
+          },
+          {
+            "name": "prescription_metadata_preservation",
+            "priority": "Low",
+            "description": "Original prescription metadata (source document ID, extraction method, confidence score) must be preserved alongside translated content.",
+            "status": "generated"
+          }
+        ],
+        "validation_rules": []
+      },
+      {
+        "step_id": "4",
+        "description": "If Bhashini fails, system falls back to LLM-based explanation generation",
+        "component_name": "LLMExplainer",
+        "component_path": "src/services/explanation/LLMExplainer.ts",
+        "order": 4,
+        "business_rules": [
+          {
+            "name": "bhashini_fallback_to_llm",
+            "priority": "High",
+            "description": "When Bhashini translation service fails or times out, system must automatically fall back to LLM-based explanation generation using OPENAI_API_KEY to ensure prescription explanations are always delivered in the patient's preferred language.",
+            "status": "generated"
+          },
+          {
+            "name": "llm_explanation_language_matching",
+            "priority": "High",
+            "description": "LLM-generated explanation must be produced in the patient's preferred language as stored in their profile, matching the original Bhashini translation intent.",
+            "status": "generated"
+          },
+          {
+            "name": "llm_explanation_medical_accuracy",
+            "priority": "High",
+            "description": "LLM explanation must be grounded in extracted facts from the source document and must not hallucinate or invent medical information not present in extracted_facts.",
+            "status": "generated"
+          },
+          {
+            "name": "llm_explanation_source_traceability",
+            "priority": "Medium",
+            "description": "LLM explanation must include or enable traceability back to the source document line or extracted fact ID so patients can verify the explanation's origin.",
+            "status": "generated"
+          },
+          {
+            "name": "llm_explanation_caching_and_reuse",
+            "priority": "Medium",
+            "description": "LLM-generated explanations for identical prescription facts and language combinations should be cached to reduce API calls and latency on repeated requests.",
+            "status": "generated"
+          },
+          {
+            "name": "llm_explanation_token_limit_enforcement",
+            "priority": "Medium",
+            "description": "LLM explanation output must not exceed token limits set by OpenAI model; explanations must be concise and patient-friendly while maintaining medical accuracy.",
+            "status": "generated"
+          },
+          {
+            "name": "llm_explanation_error_logging_and_monitoring",
+            "priority": "Medium",
+            "description": "All LLM explanation generation failures must be logged with context (patient ID, document ID, language, error type) for debugging and monitoring system health.",
+            "status": "generated"
+          }
+        ],
+        "validation_rules": []
+      },
+      {
+        "step_id": "5",
+        "description": "Patient reads plain-language explanation of the prescription or medical term in their chosen language",
+        "component_name": "ExplanationPanel",
+        "component_path": "src/components/patient/ExplanationPanel.tsx",
+        "order": 5,
+        "business_rules": [
+          {
+            "name": "multilingual_explanation_generation",
+            "priority": "High",
+            "description": "Generate plain-language medical explanation in patient's chosen language using AI (OPENAI_API_KEY) and translation service (BHASHINI_API_KEY, BHASHINI_USER_ID).",
+            "status": "generated"
+          },
+          {
+            "name": "language_preference_consistency",
+            "priority": "High",
+            "description": "Ensure explanation is rendered in the language stored in patient profile (from GET /api/my/profile response).",
+            "status": "generated"
+          },
+          {
+            "name": "fact_source_traceability",
+            "priority": "High",
+            "description": "Display source document reference (extracted_facts.source_document_id) alongside explanation so patient can verify the origin of medical information.",
+            "status": "generated"
+          },
+          {
+            "name": "confidence_score_display",
+            "priority": "Medium",
+            "description": "Display extraction confidence score (extracted_facts.confidence_score) to indicate reliability of the extracted medical fact.",
+            "status": "generated"
+          },
+          {
+            "name": "read_only_explanation_view",
+            "priority": "Medium",
+            "description": "ExplanationPanel is read-only; patient cannot edit or modify the explanation text.",
+            "status": "generated"
+          },
+          {
+            "name": "explanation_caching_for_performance",
+            "priority": "Low",
+            "description": "Cache generated explanations (keyed by fact_id + language) to reduce API calls and improve response time for repeated views.",
+            "status": "generated"
+          }
+        ],
+        "validation_rules": []
+      }
+    ]
+  },
+  {
+    "flow_id": "F007",
+    "name": "Triage & Specialist Recommendation",
+    "description": "System recommends appropriate specialist or department based on patient symptoms and medical history, with reasoning and visible disclaimer that this is not a diagnosis.",
+    "priority": "P2",
+    "priority_label": "Moderate Use",
+    "steps": [
+      {
+        "step_id": "1",
+        "description": "Patient navigates to 'Get Specialist Recommendation' section",
+        "component_name": "PatientDashboard",
+        "component_path": "src/components/patient/PatientDashboard.tsx",
+        "order": 1,
+        "business_rules": [
+          {
+            "name": "specialist_recommendation_eligibility_check",
+            "priority": "High",
+            "description": "Patient must have at least one processed document with extracted facts before accessing specialist recommendation section to ensure sufficient medical history data exists for AI analysis.",
+            "status": "generated"
+          },
+          {
+            "name": "ai_specialist_recommendation_generation",
+            "priority": "High",
+            "description": "System must invoke OpenAI API (OPENAI_API_KEY) to analyze extracted medical facts and generate specialist recommendations based on patient's conditions, medications, and test results.",
+            "status": "generated"
+          },
+          {
+            "name": "multilingual_recommendation_translation",
+            "priority": "Medium",
+            "description": "Specialist recommendations must be translated to patient's preferred language using Bhashini API (BHASHINI_API_KEY, BHASHINI_USER_ID) if language preference is not English.",
+            "status": "generated"
+          },
+          {
+            "name": "recommendation_source_traceability",
+            "priority": "High",
+            "description": "Each specialist recommendation must include traceable references to source documents and extracted facts (with line-level citations) to maintain transparency and allow patient verification.",
+            "status": "generated"
+          },
+          {
+            "name": "access_logging_for_recommendation_view",
+            "priority": "Medium",
+            "description": "Log patient's access to specialist recommendation section in access_logs table to maintain audit trail of who viewed what and when.",
+            "status": "generated"
+          }
+        ],
+        "validation_rules": []
+      },
+      {
+        "step_id": "2",
+        "description": "System analyzes extracted_facts, medications, and appointments to identify symptoms and conditions",
+        "component_name": "SymptomAnalyzer",
+        "component_path": "src/services/triage/SymptomAnalyzer.ts",
+        "order": 2,
+        "business_rules": [
+          {
+            "name": "symptom_extraction_from_facts",
+            "priority": "High",
+            "description": "System must extract symptom entities from extracted_facts with fact_type='symptom' and cross-reference confidence_score to filter low-confidence symptoms below 0.6 threshold.",
+            "status": "generated"
+          },
+          {
+            "name": "medication_interaction_check",
+            "priority": "High",
+            "description": "System must validate current medications against known drug-drug interactions using RXNORM_API_URL and DDInter integration before recommending specialists.",
+            "status": "generated"
+          },
+          {
+            "name": "appointment_history_context",
+            "priority": "Medium",
+            "description": "System must incorporate recent appointment history (last 12 months) to contextualize symptoms and avoid duplicate specialist referrals for same condition.",
+            "status": "generated"
+          },
+          {
+            "name": "symptom_severity_classification",
+            "priority": "High",
+            "description": "System must classify identified symptoms into severity tiers (critical/urgent/routine) based on extracted_facts content and metadata to prioritize specialist type.",
+            "status": "generated"
+          },
+          {
+            "name": "ai_extraction_traceability",
+            "priority": "High",
+            "description": "System must maintain traceability by preserving source_document_id and extraction_method for every symptom/condition identified, enabling audit trail per PRD requirement.",
+            "status": "generated"
+          },
+          {
+            "name": "confidence_score_validation",
+            "priority": "Medium",
+            "description": "System must validate extracted_facts.confidence_score is within valid range (0.0–1.0) and apply weighting to symptom analysis accordingly.",
+            "status": "generated"
+          },
+          {
+            "name": "verified_facts_priority",
+            "priority": "Medium",
+            "description": "System must prioritize verified=true facts over unverified facts when generating specialist recommendations.",
+            "status": "generated"
+          }
+        ],
+        "validation_rules": []
+      },
+      {
+        "step_id": "3",
+        "description": "System calls OpenAI to generate department recommendation with reasoning based on patient history",
+        "component_name": "TriageEngine",
+        "component_path": "src/services/triage/TriageEngine.ts",
+        "order": 3,
+        "business_rules": [
+          {
+            "name": "openai_triage_recommendation_generation",
+            "priority": "High",
+            "description": "System must call OpenAI API (OPENAI_API_KEY) to generate department recommendation with clinical reasoning based on extracted patient history facts and medical context.",
+            "status": "generated"
+          },
+          {
+            "name": "recommendation_reasoning_traceability",
+            "priority": "High",
+            "description": "Department recommendation must include explicit reasoning that references specific extracted facts and their source documents to maintain transparency and auditability.",
+            "status": "generated"
+          },
+          {
+            "name": "confidence_score_filtering",
+            "priority": "Medium",
+            "description": "Only extracted facts with confidence_score >= 0.75 should be used as primary inputs to OpenAI recommendation engine; lower-confidence facts should be marked as supporting context.",
+            "status": "generated"
+          },
+          {
+            "name": "verified_facts_prioritization",
+            "priority": "Medium",
+            "description": "Extracted facts marked as verified=true should be weighted higher in the OpenAI prompt context than unverified facts.",
+            "status": "generated"
+          },
+          {
+            "name": "medication_interaction_context",
+            "priority": "High",
+            "description": "Current and historical medications extracted from patient documents must be included in OpenAI recommendation context to enable drug interaction and contraindication awareness.",
+            "status": "generated"
+          },
+          {
+            "name": "recommendation_response_persistence",
+            "priority": "Medium",
+            "description": "OpenAI-generated recommendation, reasoning, and confidence metadata must be persisted to enable audit trail, patient transparency, and doctor verification. [schema: add recommendation_id, department, reasoning, confidence_score, generated_at to extracted_facts or new Recommendations model]",
+            "status": "generated"
+          }
+        ],
+        "validation_rules": []
+      },
+      {
+        "step_id": "4",
+        "description": "Patient views recommended specialist/department with reasoning and visible disclaimer that this is not a diagnosis",
+        "component_name": "TriageRecommendationPanel",
+        "component_path": "src/components/patient/TriageRecommendationPanel.tsx",
+        "order": 4,
+        "business_rules": [
+          {
+            "name": "specialist_recommendation_disclaimer_display",
+            "priority": "High",
+            "description": "A visible disclaimer must be displayed stating that the specialist recommendation is AI-generated and not a medical diagnosis, ensuring patient understands the advisory nature of the recommendation.",
+            "status": "generated"
+          },
+          {
+            "name": "recommendation_reasoning_transparency",
+            "priority": "High",
+            "description": "The reasoning behind the specialist recommendation must be displayed to the patient, showing which extracted facts and symptoms led to the recommendation.",
+            "status": "generated"
+          },
+          {
+            "name": "recommendation_confidence_scoring",
+            "priority": "Medium",
+            "description": "Display confidence score or reliability indicator for the specialist recommendation based on the quality and quantity of extracted facts supporting it.",
+            "status": "generated"
+          },
+          {
+            "name": "recommendation_source_document_traceability",
+            "priority": "High",
+            "description": "Each fact contributing to the specialist recommendation must be traceable back to its source document with line-level reference.",
+            "status": "generated"
+          },
+          {
+            "name": "recommendation_multilingual_support",
+            "priority": "Medium",
+            "description": "Specialist recommendation, disclaimer, and reasoning must be presented in the patient's preferred language using Bhashini translation service.",
+            "status": "generated"
+          },
+          {
+            "name": "recommendation_access_logging",
+            "priority": "Medium",
+            "description": "Log when a patient views the specialist recommendation, including timestamp and recommendation ID, for audit trail and patient transparency.",
+            "status": "generated"
+          }
+        ],
+        "validation_rules": []
+      }
+    ]
+  },
+  {
+    "flow_id": "F008",
+    "name": "Facility Locator",
+    "description": "Patient locates nearby diagnostic centers, pharmacies, and emergency facilities using Overpass API and Leaflet map visualization.",
+    "priority": "P2",
+    "priority_label": "Moderate Use",
+    "steps": [
+      {
+        "step_id": "1",
+        "description": "Patient navigates to 'Find Nearby Facilities' section",
+        "component_name": "PatientDashboard",
+        "component_path": "src/components/patient/PatientDashboard.tsx",
+        "order": 1,
+        "business_rules": [
+          {
+            "name": "geolocation_permission_check",
+            "priority": "High",
+            "description": "Patient must grant browser geolocation permission before facility search can proceed; if denied, display fallback manual location entry.",
+            "status": "generated"
+          },
+          {
+            "name": "facility_search_via_overpass_api",
+            "priority": "High",
+            "description": "Query Overpass API (env var OVERPASS_API_URL) with patient's coordinates to retrieve nearby healthcare facilities (hospitals, clinics, pharmacies); cache results for 1 hour.",
+            "status": "generated"
+          },
+          {
+            "name": "facility_map_rendering_with_leaflet",
+            "priority": "High",
+            "description": "Render retrieved facilities on interactive Leaflet map (Leaflet SDK) with patient location marker and facility pins; allow filtering by facility type.",
+            "status": "generated"
+          },
+          {
+            "name": "facility_detail_display",
+            "priority": "Medium",
+            "description": "Display facility details including name, address, phone, hours, specialties, and distance from patient; allow patient to call, get directions, or schedule appointment.",
+            "status": "generated"
+          },
+          {
+            "name": "facility_search_history_logging",
+            "priority": "Low",
+            "description": "Log each facility search query (location, timestamp, results count) to access_logs table for analytics and audit trail.",
+            "status": "generated"
+          }
+        ],
+        "validation_rules": []
+      },
+      {
+        "step_id": "2",
+        "description": "Patient enters their location or allows geolocation access",
+        "component_name": "LocationInput",
+        "component_path": "src/components/patient/LocationInput.tsx",
+        "order": 2,
+        "business_rules": [
+          {
+            "name": "geolocation_permission_request",
+            "priority": "High",
+            "description": "System must request explicit user permission before accessing device geolocation via browser API.",
+            "status": "generated"
+          },
+          {
+            "name": "location_data_privacy_handling",
+            "priority": "High",
+            "description": "Patient location data must not be persisted to database; only use for real-time facility search via Overpass API (OVERPASS_API_URL).",
+            "status": "generated"
+          },
+          {
+            "name": "facility_search_via_overpass",
+            "priority": "High",
+            "description": "Use Overpass API (OVERPASS_API_URL) to query nearby healthcare facilities (hospitals, clinics, pharmacies) within configurable radius.",
+            "status": "generated"
+          },
+          {
+            "name": "location_input_method_selection",
+            "priority": "Medium",
+            "description": "Patient must choose between automatic geolocation or manual address/city entry; both paths must be equally accessible.",
+            "status": "generated"
+          },
+          {
+            "name": "location_format_normalization",
+            "priority": "Medium",
+            "description": "Normalize manual location input (address, city, postal code) to standardized lat/lon coordinates for Overpass API query.",
+            "status": "generated"
+          }
+        ],
+        "validation_rules": [
+          {
+            "field_name": "latitude",
+            "description": "Latitude must be a valid decimal between -90 and 90.",
+            "status": "generated"
+          },
+          {
+            "field_name": "longitude",
+            "description": "Longitude must be a valid decimal between -180 and 180.",
+            "status": "generated"
+          },
+          {
+            "field_name": "address",
+            "description": "Manual address input must be between 3 and 255 characters.",
+            "status": "generated"
+          },
+          {
+            "field_name": "city",
+            "description": "City name must be between 2 and 100 characters.",
+            "status": "generated"
+          },
+          {
+            "field_name": "postal_code",
+            "description": "Postal code must match regional format (alphanumeric, 3–10 characters, no special chars except hyphen/space).",
+            "status": "generated"
+          },
+          {
+            "field_name": "search_radius",
+            "description": "Search radius (in km) must be between 1 and 50.",
+            "status": "generated"
+          }
+        ]
+      },
+      {
+        "step_id": "3",
+        "description": "System queries Overpass API to find nearby diagnostic centers, pharmacies, and emergency facilities",
+        "component_name": "OverpassQuerier",
+        "component_path": "src/services/facilities/OverpassQuerier.ts",
+        "order": 3,
+        "business_rules": [
+          {
+            "name": "overpass_api_availability_check",
+            "priority": "High",
+            "description": "System must verify Overpass API is accessible and responding before querying for facilities; if unavailable, return cached results or user-friendly error. [integration: OVERPASS_API_URL]",
+            "status": "generated"
+          },
+          {
+            "name": "facility_type_filtering",
+            "priority": "High",
+            "description": "System must filter Overpass API results to only include diagnostic centers, pharmacies, and emergency facilities as specified in the PRD.",
+            "status": "generated"
+          },
+          {
+            "name": "geolocation_proximity_validation",
+            "priority": "High",
+            "description": "System must validate that user's geolocation coordinates are valid (latitude -90 to 90, longitude -180 to 180) before querying Overpass API.",
+            "status": "generated"
+          },
+          {
+            "name": "facility_result_caching",
+            "priority": "Medium",
+            "description": "System should cache Overpass API results for 1 hour per geographic region to reduce API calls and improve response time for repeated queries.",
+            "status": "generated"
+          },
+          {
+            "name": "facility_distance_sorting",
+            "priority": "Medium",
+            "description": "System must calculate and sort returned facilities by distance from user's location (nearest first) before display.",
+            "status": "generated"
+          },
+          {
+            "name": "facility_data_enrichment",
+            "priority": "Low",
+            "description": "System may enrich Overpass API facility data with additional metadata (hours, contact info, ratings) from secondary sources if available.",
+            "status": "generated"
+          }
+        ],
+        "validation_rules": []
+      },
+      {
+        "step_id": "4",
+        "description": "System renders results on interactive Leaflet map with markers for each facility type",
+        "component_name": "FacilityMap",
+        "component_path": "src/components/patient/FacilityMap.tsx",
+        "order": 4,
+        "business_rules": [
+          {
+            "name": "facility_data_retrieval_and_mapping",
+            "priority": "High",
+            "description": "System must retrieve facility location data from Overpass API (OVERPASS_API_URL) and transform it into marker objects compatible with Leaflet map rendering.",
+            "status": "generated"
+          },
+          {
+            "name": "marker_clustering_and_performance",
+            "priority": "Medium",
+            "description": "System must implement marker clustering for large facility datasets to prevent map performance degradation and improve user experience on initial render.",
+            "status": "generated"
+          },
+          {
+            "name": "facility_type_visual_differentiation",
+            "priority": "High",
+            "description": "System must render distinct marker icons or colors for each facility type (hospital, clinic, pharmacy, diagnostic center, etc.) to enable quick visual identification.",
+            "status": "generated"
+          },
+          {
+            "name": "marker_interactivity_and_detail_popup",
+            "priority": "High",
+            "description": "System must attach click handlers to each marker that display a popup with facility name, address, contact information, and distance from user location.",
+            "status": "generated"
+          },
+          {
+            "name": "user_location_tracking_and_distance_calculation",
+            "priority": "Medium",
+            "description": "System must request user's geolocation (with consent) and calculate distance from user to each facility to enable distance-based sorting and proximity indicators.",
+            "status": "generated"
+          },
+          {
+            "name": "map_state_persistence_and_navigation",
+            "priority": "Low",
+            "description": "System must preserve map viewport state (zoom level, center coordinates, selected facility) in browser session storage to maintain user context during navigation.",
+            "status": "generated"
+          }
+        ],
+        "validation_rules": []
+      },
+      {
+        "step_id": "5",
+        "description": "Patient views facility details (name, address, distance, hours) and can navigate to them",
+        "component_name": "FacilityDetailPanel",
+        "component_path": "src/components/patient/FacilityDetailPanel.tsx",
+        "order": 5,
+        "business_rules": [],
+        "validation_rules": []
+      }
+    ]
+  }
+]

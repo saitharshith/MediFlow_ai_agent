@@ -1,5 +1,10 @@
 # Product Requirement Document: MediFlow
 
+**Version:** 2.0 (hackathon build scope)
+**Date:** July 2026
+**Constraint:** Built in the provided hackathon IDE using Claude Haiku 4.5 only.
+
+---
 
 ## Product Name
 
@@ -11,6 +16,18 @@ An AI-powered healthcare navigation and patient care coordination agent designed
 
 MediFlow turns scattered prescriptions, diagnostic reports and discharge summaries into a single longitudinal timeline **and knowledge graph**. Every AI-extracted fact is traceable to the document line it came from, and every doctor's access to a record is consented via OTP and logged where the patient can see it.
 
+## What Changed From v1
+
+| Change | Reason |
+| --- | --- |
+| Knowledge-graph view added alongside the timeline | The living graph of visits → medicines → conditions → tests is the memorable differentiator; a timeline alone looks like every other submission |
+| OTP consent + patient-visible access log added | The problem statement explicitly asks for "transparency and accountability"; v1 had roles but no consent flow |
+| XAI Source Ledger promoted to a core capability | Every extracted fact stores its source snippet and is clickable back to the original document |
+| Mini-evaluation set added as a deliverable | 10 hand-labelled prescriptions → a measured accuracy number; almost no hackathon team measures anything |
+| Scheduling + notifications demoted to thin/mocked | Booking infrastructure is not judged; visible behaviour is |
+| Agent = plain tool-calling loop (not a state-machine framework) | Smaller model, shorter build, same agentic story |
+
+---
 
 ## Target Users
 

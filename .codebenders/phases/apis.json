@@ -10,76 +10,69 @@
       "usage_files": []
     },
     {
-      "id": "google-oauth",
-      "category": "Auth",
-      "sdk": "Google OAuth",
+      "id": "bhashini",
+      "category": "other",
+      "sdk": "Bhashini",
       "env_vars": [
-        "GOOGLE_CLIENT_ID",
-        "GOOGLE_CLIENT_SECRET",
-        "GOOGLE_OAUTH_CLIENT_ID",
-        "GOOGLE_OAUTH_CLIENT_SECRET"
+        "BHASHINI_API_KEY",
+        "BHASHINI_USER_ID"
       ],
       "usage_files": []
     },
     {
-      "id": "cloudinary",
-      "category": "Media / CDN",
-      "sdk": "Cloudinary",
+      "id": "ntfy",
+      "category": "push-notifications",
+      "sdk": "ntfy.sh",
       "env_vars": [
-        "CLOUDINARY_CLOUD_NAME",
-        "CLOUDINARY_API_KEY",
-        "CLOUDINARY_API_SECRET"
+        "NTFY_TOPIC"
       ],
       "usage_files": []
     },
     {
-      "id": "sendgrid",
-      "category": "Email",
-      "sdk": "SendGrid",
-      "env_vars": [
-        "SENDGRID_API_KEY",
-        "SENDGRID_FROM_EMAIL"
-      ],
-      "usage_files": []
-    },
-    {
-      "id": "twilio",
-      "category": "SMS",
-      "sdk": "Twilio",
-      "env_vars": [
-        "TWILIO_ACCOUNT_SID",
-        "TWILIO_AUTH_TOKEN",
-        "TWILIO_PHONE_NUMBER"
-      ],
-      "usage_files": []
-    },
-    {
-      "id": "google-maps",
+      "id": "leaflet",
       "category": "mapping",
-      "sdk": "Google Maps",
+      "sdk": "Leaflet",
+      "env_vars": [],
+      "usage_files": []
+    },
+    {
+      "id": "overpass",
+      "category": "other",
+      "sdk": "Overpass API",
       "env_vars": [
-        "GOOGLE_MAPS_API_KEY"
+        "OVERPASS_API_URL"
       ],
       "usage_files": []
     },
     {
-      "id": "posthog",
-      "category": "Analytics",
-      "sdk": "PostHog",
+      "id": "synthea",
+      "category": "other",
+      "sdk": "Synthea",
+      "env_vars": [],
+      "usage_files": []
+    },
+    {
+      "id": "rxnorm",
+      "category": "other",
+      "sdk": "RxNorm",
       "env_vars": [
-        "NEXT_PUBLIC_POSTHOG_KEY",
-        "NEXT_PUBLIC_POSTHOG_HOST",
-        "POSTHOG_API_KEY",
-        "POSTHOG_PROJECT_ID"
+        "RXNORM_API_URL"
       ],
       "usage_files": []
     },
     {
-      "id": "mapping",
-      "category": "mapping",
-      "sdk": "Google Maps",
+      "id": "ddinter",
+      "category": "other",
+      "sdk": "DDInter",
+      "env_vars": [],
+      "usage_files": []
+    },
+    {
+      "id": "openfda",
+      "category": "other",
+      "sdk": "openFDA",
       "env_vars": [
-        "GOOGLE_MAPS_API_KEY"
+        "OPENFDA_API_KEY"
       ],
       "usage_files": []
     }

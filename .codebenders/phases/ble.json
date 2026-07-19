@@ -1,0 +1,221 @@
+{
+  "components": [
+    {
+      "name": "RootLayout",
+      "path": "src/app/layout.tsx",
+      "props": [
+        "children"
+      ],
+      "purpose": "Root layout with auth state provider, theme context, and global navigation wrapper."
+    },
+    {
+      "name": "Navbar",
+      "path": "src/components/Navbar.tsx",
+      "props": [
+        "userRole",
+        "onLogout"
+      ],
+      "purpose": "Top navigation bar with role-based menu items, user profile, and logout."
+    },
+    {
+      "name": "LoginPage",
+      "path": "src/app/login/page.tsx",
+      "props": [],
+      "purpose": "Authentication entry point with email/password login and role selection."
+    },
+    {
+      "name": "SignupPage",
+      "path": "src/app/signup/page.tsx",
+      "props": [],
+      "purpose": "User registration form for patients, doctors, and administrators."
+    },
+    {
+      "name": "PatientDashboard",
+      "path": "src/app/patient/dashboard/page.tsx",
+      "props": [
+        "patientId"
+      ],
+      "purpose": "Patient home view showing medical records summary, upcoming appointments, and medication alerts."
+    },
+    {
+      "name": "DoctorDashboard",
+      "path": "src/app/doctor/dashboard/page.tsx",
+      "props": [
+        "doctorId"
+      ],
+      "purpose": "Doctor home view with patient access requests, clinical summaries queue, and recent consultations."
+    },
+    {
+      "name": "AdminDashboard",
+      "path": "src/app/admin/dashboard/page.tsx",
+      "props": [
+        "facilityId"
+      ],
+      "purpose": "Hospital administrator view with compliance metrics, treatment timelines, and operational bottlenecks."
+    },
+    {
+      "name": "DocumentList",
+      "path": "src/app/patient/documents/page.tsx",
+      "props": [
+        "patientId"
+      ],
+      "purpose": "Paginated list of patient's uploaded medical documents with filters and search."
+    },
+    {
+      "name": "DocumentUploadForm",
+      "path": "src/components/DocumentUploadForm.tsx",
+      "props": [
+        "patientId",
+        "onUploadSuccess"
+      ],
+      "purpose": "Multimodal file upload component with AI extraction progress and preview."
+    },
+    {
+      "name": "DocumentDetail",
+      "path": "src/app/patient/documents/[id]/page.tsx",
+      "props": [
+        "documentId"
+      ],
+      "purpose": "Single document view with extracted facts, source snippets, and fact-to-source tracing."
+    },
+    {
+      "name": "KnowledgeGraph",
+      "path": "src/components/KnowledgeGraph.tsx",
+      "props": [
+        "patientId",
+        "nodes",
+        "edges"
+      ],
+      "purpose": "Interactive visualization of patient history (visits, medications, conditions, tests, doctors)."
+    },
+    {
+      "name": "MedicationList",
+      "path": "src/app/patient/medications/page.tsx",
+      "props": [
+        "patientId"
+      ],
+      "purpose": "List of patient's medications with interaction warnings and plain-language explanations."
+    },
+    {
+      "name": "DrugInteractionAlert",
+      "path": "src/components/DrugInteractionAlert.tsx",
+      "props": [
+        "interactions",
+        "medications"
+      ],
+      "purpose": "Alert component displaying detected drug interactions and duplicate medications."
+    },
+    {
+      "name": "AccessRequestForm",
+      "path": "src/components/AccessRequestForm.tsx",
+      "props": [
+        "patientId",
+        "onSubmit"
+      ],
+      "purpose": "Form for doctors to request time-limited OTP-based access to patient records."
+    },
+    {
+      "name": "AccessLog",
+      "path": "src/app/patient/access-logs/page.tsx",
+      "props": [
+        "patientId"
+      ],
+      "purpose": "Audit trail of all doctor access attempts with timestamps, OTP verification status, and actions taken."
+    },
+    {
+      "name": "ClinicalSummary",
+      "path": "src/app/doctor/summaries/[patientId]/page.tsx",
+      "props": [
+        "patientId",
+        "doctorId"
+      ],
+      "purpose": "AI-generated clinical summary with source verification, extracted facts, and document citations."
+    },
+    {
+      "name": "SpecialistRecommendation",
+      "path": "src/components/SpecialistRecommendation.tsx",
+      "props": [
+        "patientId",
+        "symptoms",
+        "history"
+      ],
+      "purpose": "Component suggesting appropriate specialists based on patient data with medical disclaimers."
+    },
+    {
+      "name": "AppointmentList",
+      "path": "src/app/patient/appointments/page.tsx",
+      "props": [
+        "patientId"
+      ],
+      "purpose": "List of scheduled and missed appointments with follow-up reminders and rescheduling options."
+    },
+    {
+      "name": "AnalyticsDashboard",
+      "path": "src/app/admin/analytics/page.tsx",
+      "props": [
+        "facilityId"
+      ],
+      "purpose": "Hospital-level analytics on compliance rates, treatment timelines, and operational bottlenecks."
+    }
+  ],
+  "architecture": {
+    "layout": "monorepo",
+    "boundaries": [
+      "Authentication & Authorization (login, signup, OTP verification, role-based access)",
+      "Document Management (upload, extraction, storage, retrieval)",
+      "Patient Records (medical history, medications, appointments, conditions)",
+      "Clinical Intelligence (drug interactions, duplicate detection, specialist recommendations)",
+      "Access Control & Audit (doctor access requests, OTP grants, audit logging)",
+      "Analytics & Reporting (hospital metrics, compliance, timelines)",
+      "AI Integration (multimodal extraction, clinical summaries, fact tracing)"
+    ],
+    "state_management": "TanStack Query (API-heavy document extraction, real-time access logs) + React Context (auth state, user role, facility context) + Zustand (collaborative knowledge graph state)",
+    "notable_dirs": [
+      "src/app/(auth) — login, signup, OTP verification",
+      "src/app/patient — patient-scoped routes (dashboard, documents, medications, appointments, access-logs)",
+      "src/app/doctor — doctor-scoped routes (dashboard, summaries, patient access)",
+      "src/app/admin — admin-scoped routes (dashboard, analytics, facility management)",
+      "src/components — shared UI (navbar, forms, alerts, knowledge graph, recommendations)",
+      "src/lib/ai — AI extraction, summarization, interaction detection, specialist recommendation logic",
+      "src/lib/audit — access logging, fact tracing, source verification",
+      "src/hooks — usePatientRecords, useDrugInteractions, useAccessLogs, useAnalytics"
+    ]
+  },
+  "flows": [
+    {
+      "name": "patient-document-upload-and-review",
+      "entry": "src/app/patient/documents/page.tsx",
+      "summary": "Patient uploads medical document → AI extracts structured facts → patient reviews extracted data with source tracing → knowledge graph updates automatically."
+    },
+    {
+      "name": "doctor-access-and-clinical-summary",
+      "entry": "src/app/doctor/dashboard/page.tsx",
+      "summary": "Doctor requests patient access → patient grants OTP → doctor receives AI-generated clinical summary with source verification → audit log records all actions."
+    },
+    {
+      "name": "medication-safety-check",
+      "entry": "src/app/patient/medications/page.tsx",
+      "summary": "Patient views medication list → system detects drug interactions and duplicates → alerts displayed with plain-language explanations → patient can share with doctor."
+    },
+    {
+      "name": "appointment-follow-up-detection",
+      "entry": "src/app/patient/appointments/page.tsx",
+      "summary": "System analyzes appointment history → identifies missed follow-ups → generates reminders → recommends appropriate specialists based on condition history."
+    },
+    {
+      "name": "hospital-compliance-monitoring",
+      "entry": "src/app/admin/analytics/page.tsx",
+      "summary": "Administrator views facility-level analytics → monitors compliance rates, treatment timelines, and operational bottlenecks → exports reports for quality improvement."
+    },
+    {
+      "name": "knowledge-graph-exploration",
+      "entry": "src/app/patient/dashboard/page.tsx",
+      "summary": "Patient interacts with knowledge graph → explores relationships between visits, medications, conditions, tests, and doctors → clicks nodes to view detailed records."
+    },
+    {
+      "name": "access-audit-and-transparency",
+      "entry": "src/app/patient/access-logs/page.tsx",
+      "summary": "Patient reviews complete audit trail of doctor access attempts → verifies OTP verification status → sees all actions taken by each doctor → maintains full transparency."
+    }
+  ]
+}

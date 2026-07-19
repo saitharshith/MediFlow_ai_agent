@@ -1,0 +1,445 @@
+{
+  "endpoints": [
+    {
+      "method": "POST",
+      "path": "/api/auth/login",
+      "handler": "auth-1",
+      "auth_required": false,
+      "request_shape": "{email?: string, password?: string, patient_id?: string, otp?: string}",
+      "response_shape": "{token: string, user_id: string, role: string, session_id: string, expires_at: string}",
+      "description": "Authenticate a patient with email and password, or a doctor with patient ID and 6-digit OTP; return JWT and session metadata."
+    },
+    {
+      "method": "POST",
+      "path": "/api/auth/register",
+      "handler": "auth-2",
+      "auth_required": false,
+      "request_shape": "{email: string, password: string, first_name: string, last_name: string, language: string}",
+      "response_shape": "{user_id: string, token: string, email: string}",
+      "description": "Register a new patient with email, password, name, and language preference; return user ID and login token."
+    },
+    {
+      "method": "POST",
+      "path": "/api/auth/logout",
+      "handler": "auth-3",
+      "auth_required": true,
+      "request_shape": "{}",
+      "response_shape": "{success: boolean}",
+      "description": "Invalidate the current session token and log the logout event."
+    },
+    {
+      "method": "GET",
+      "path": "/api/my/profile",
+      "handler": "patients-4",
+      "auth_required": true,
+      "request_shape": "?",
+      "response_shape": "{user_id: string, email: string, first_name: string, last_name: string, language: string, created_at: string}",
+      "description": "Retrieve the authenticated patient's profile including language preference and contact details."
+    },
+    {
+      "method": "PATCH",
+      "path": "/api/my/profile",
+      "handler": "patients-5",
+      "auth_required": true,
+      "request_shape": "Partial<{first_name: string, last_name: string, language: string, phone: string}>",
+      "response_shape": "{user_id: string, email: string, first_name: string, last_name: string, language: string}",
+      "description": "Update the authenticated patient's profile fields such as language preference or contact information."
+    },
+    {
+      "method": "GET",
+      "path": "/api/my/documents",
+      "handler": "documents-6",
+      "auth_required": true,
+      "request_shape": "?limit=int&offset=int",
+      "response_shape": "{documents: [{id: string, title: string, document_type: string, status: string, created_at: string, author_id: string}], total: int}",
+      "description": "List all medical documents uploaded by the authenticated patient, sorted by creation date descending."
+    },
+    {
+      "method": "POST",
+      "path": "/api/my/documents",
+      "handler": "documents-7",
+      "auth_required": true,
+      "request_shape": "FormData: {file: File, document_type: string, title?: string}",
+      "response_shape": "{id: string, title: string, document_type: string, status: string, created_at: string}",
+      "description": "Upload a new medical document (prescription, report, summary) as multipart form data; trigger AI extraction pipeline."
+    },
+    {
+      "method": "GET",
+      "path": "/api/my/documents/{id}",
+      "handler": "documents-8",
+      "auth_required": true,
+      "request_shape": "?",
+      "response_shape": "{id: string, title: string, document_type: string, status: string, content: string, created_at: string, author_id: string}",
+      "description": "Retrieve a single document with its full content and extraction status."
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/my/documents/{id}",
+      "handler": "documents-9",
+      "auth_required": true,
+      "request_shape": "{}",
+      "response_shape": "{success: boolean, deleted_id: string}",
+      "description": "Delete a document and all associated extracted facts; log the deletion action."
+    },
+    {
+      "method": "GET",
+      "path": "/api/my/extracted-facts",
+      "handler": "facts-10",
+      "auth_required": true,
+      "request_shape": "?fact_type=string&min_confidence=float&limit=int&offset=int",
+      "response_shape": "{facts: [{id: string, content: string, fact_type: string, confidence_score: float, source_document_id: string, quoted_snippet: string, extraction_method: string, created_at: string}], total: int}",
+      "description": "List all extracted facts from the patient's documents with source traceability; filter by fact_type or confidence_score."
+    },
+    {
+      "method": "GET",
+      "path": "/api/my/extracted-facts/{id}",
+      "handler": "facts-11",
+      "auth_required": true,
+      "request_shape": "?",
+      "response_shape": "{id: string, content: string, fact_type: string, confidence_score: float, source_document_id: string, quoted_snippet: string, extraction_method: string, created_at: string}",
+      "description": "Retrieve a single extracted fact with its full source document reference and quoted snippet."
+    },
+    {
+      "method": "GET",
+      "path": "/api/my/medications",
+      "handler": "medications-12",
+      "auth_required": true,
+      "request_shape": "?limit=int&offset=int",
+      "response_shape": "{medications: [{id: string, drug_name: string, rxcui: string, dose: string, frequency: string, start_date: string, end_date: string, prescriber: string, created_at: string}], total: int}",
+      "description": "List all medications extracted from the patient's documents, normalized by RxCUI with dose and date ranges."
+    },
+    {
+      "method": "GET",
+      "path": "/api/my/medications/{id}",
+      "handler": "medications-13",
+      "auth_required": true,
+      "request_shape": "?",
+      "response_shape": "{id: string, drug_name: string, rxcui: string, dose: string, frequency: string, start_date: string, end_date: string, prescriber: string, source_document_id: string, created_at: string}",
+      "description": "Retrieve a single medication record with prescriber details and source document reference."
+    },
+    {
+      "method": "GET",
+      "path": "/api/my/appointments",
+      "handler": "appointments-14",
+      "auth_required": true,
+      "request_shape": "?status=string&limit=int&offset=int",
+      "response_shape": "{appointments: [{id: string, doctor_id: string, doctor_name: string, appointment_date: string, status: string, follow_up_due_date: string, created_at: string}], total: int}",
+      "description": "List all appointments (scheduled, completed, missed) with follow-up due dates and doctor information."
+    },
+    {
+      "method": "POST",
+      "path": "/api/my/appointments",
+      "handler": "appointments-15",
+      "auth_required": true,
+      "request_shape": "{doctor_id: string, appointment_date: string, reason: string, follow_up_due_date?: string}",
+      "response_shape": "{id: string, doctor_id: string, appointment_date: string, status: string, created_at: string}",
+      "description": "Create a new appointment record with scheduled date and doctor assignment."
+    },
+    {
+      "method": "PATCH",
+      "path": "/api/my/appointments/{id}",
+      "handler": "appointments-16",
+      "auth_required": true,
+      "request_shape": "Partial<{status: string, appointment_date: string, follow_up_due_date: string}>",
+      "response_shape": "{id: string, status: string, appointment_date: string, follow_up_due_date: string}",
+      "description": "Update appointment status (completed, missed, rescheduled) and follow-up due date."
+    },
+    {
+      "method": "GET",
+      "path": "/api/my/flags",
+      "handler": "flags-17",
+      "auth_required": true,
+      "request_shape": "?flag_type=string&limit=int&offset=int",
+      "response_shape": "{flags: [{id: string, key: string, description: string, severity: string, triggered_by_facts: string[], created_at: string}], total: int}",
+      "description": "List all detected care gaps and conflicts: duplicate medications, drug interactions, missed follow-ups, with severity and triggering facts."
+    },
+    {
+      "method": "GET",
+      "path": "/api/my/knowledge-graph",
+      "handler": "graph-18",
+      "auth_required": true,
+      "request_shape": "?",
+      "response_shape": "{nodes: [{id: string, label: string, type: string, data: object}], edges: [{source: string, target: string, label: string, type: string}]}",
+      "description": "Retrieve the patient's full knowledge graph as nodes (visits, doctors, medications, conditions, tests) and edges (prescriptions, follow-ups); format as JSON for visualization."
+    },
+    {
+      "method": "POST",
+      "path": "/api/my/otp/generate",
+      "handler": "otp-19",
+      "auth_required": true,
+      "request_shape": "{doctor_email: string}",
+      "response_shape": "{otp: string, expires_at: string, doctor_email: string}",
+      "description": "Generate a 6-digit OTP for a doctor to access this patient's record; OTP expires in 30 minutes and is single-use."
+    },
+    {
+      "method": "POST",
+      "path": "/api/my/otp/revoke",
+      "handler": "otp-20",
+      "auth_required": true,
+      "request_shape": "{otp_session_id: string}",
+      "response_shape": "{success: boolean, revoked_session_id: string}",
+      "description": "Revoke an active OTP session immediately, terminating the doctor's access."
+    },
+    {
+      "method": "GET",
+      "path": "/api/my/access-logs",
+      "handler": "accesslogs-21",
+      "auth_required": true,
+      "request_shape": "?limit=int&offset=int",
+      "response_shape": "{logs: [{id: string, user_id: string, doctor_name: string, resource: string, action: string, timestamp: string, session_duration_minutes: int, ip_address: string, user_agent: string}], total: int}",
+      "description": "List all access events to this patient's record: doctor, timestamp, session duration, IP address, user agent; sorted by recency."
+    },
+    {
+      "method": "GET",
+      "path": "/api/my/explanations",
+      "handler": "explanations-22",
+      "auth_required": true,
+      "request_shape": "?term=string&language=string",
+      "response_shape": "{term: string, explanation: string, language: string, source: string}",
+      "description": "Retrieve plain-language explanations of prescriptions and medical terms in the patient's chosen language; powered by Bhashini or LLM fallback."
+    },
+    {
+      "method": "GET",
+      "path": "/api/my/specialist-recommendations",
+      "handler": "recommendations-23",
+      "auth_required": true,
+      "request_shape": "?",
+      "response_shape": "{recommendations: [{specialist: string, department: string, confidence_score: float, reasoning: string, disclaimer: string}]}",
+      "description": "Generate specialist or department recommendations based on symptoms and medical history; include confidence score and non-actionable disclaimer."
+    },
+    {
+      "method": "GET",
+      "path": "/api/my/facilities",
+      "handler": "facilities-24",
+      "auth_required": true,
+      "request_shape": "?facility_type=string&radius_km=int",
+      "response_shape": "{facilities: [{id: string, name: string, type: string, latitude: float, longitude: float, address: string, phone: string, distance_km: float}]}",
+      "description": "Locate nearby diagnostic centers, pharmacies, and emergency facilities using Overpass/OpenStreetMap and Leaflet; return map coordinates and contact info."
+    },
+    {
+      "method": "GET",
+      "path": "/api/doctor/patient/{patient_id}/summary",
+      "handler": "doctor-25",
+      "auth_required": true,
+      "request_shape": "?",
+      "response_shape": "{summary: string, claims: [{text: string, source_document_id: string, quoted_snippet: string, confidence_score: float}], generated_at: string}",
+      "description": "Retrieve the AI-generated clinical summary for a patient (doctor must have active OTP session); each claim is linked to source document and quoted snippet."
+    },
+    {
+      "method": "GET",
+      "path": "/api/doctor/patient/{patient_id}/timeline",
+      "handler": "doctor-26",
+      "auth_required": true,
+      "request_shape": "?",
+      "response_shape": "{timeline: [{date: string, event_type: string, description: string, source_document_id: string}]}",
+      "description": "Retrieve the patient's full longitudinal timeline (visits, medications, tests, treatments) for doctor review during active OTP session."
+    },
+    {
+      "method": "GET",
+      "path": "/api/doctor/patient/{patient_id}/graph",
+      "handler": "doctor-27",
+      "auth_required": true,
+      "request_shape": "?",
+      "response_shape": "{nodes: [{id: string, label: string, type: string, data: object}], edges: [{source: string, target: string, label: string, type: string}]}",
+      "description": "Retrieve the patient's knowledge graph (nodes and edges) for doctor visualization during active OTP session."
+    },
+    {
+      "method": "GET",
+      "path": "/api/doctor/patient/{patient_id}/flags",
+      "handler": "doctor-28",
+      "auth_required": true,
+      "request_shape": "?",
+      "response_shape": "{flags: [{id: string, key: string, description: string, severity: string, triggered_by_facts: string[]}]}",
+      "description": "Retrieve all detected flags (duplicate medications, drug interactions, missed follow-ups) for the patient during active OTP session."
+    },
+    {
+      "method": "GET",
+      "path": "/api/admin/analytics/compliance",
+      "handler": "admin-29",
+      "auth_required": true,
+      "request_shape": "?start_date=string&end_date=string&cohort=string",
+      "response_shape": "{missed_followup_rate: float, medication_adherence_rate: float, appointment_completion_rate: float, total_patients: int, period: string}",
+      "description": "Retrieve hospital-level compliance metrics (anonymized): missed follow-up rates, medication adherence, appointment completion rates; aggregated by cohort."
+    },
+    {
+      "method": "GET",
+      "path": "/api/admin/analytics/bottlenecks",
+      "handler": "admin-30",
+      "auth_required": true,
+      "request_shape": "?",
+      "response_shape": "{bottlenecks: [{alert_type: string, metric_value: float, threshold: float, affected_cohort_size: int, severity: string}]}",
+      "description": "Retrieve appointment bottleneck alerts (anonymized): >20% missed follow-ups, >30-day appointment delays; surface as KPI cards with drill-down capability."
+    },
+    {
+      "method": "GET",
+      "path": "/api/admin/analytics/treatment-timelines",
+      "handler": "admin-31",
+      "auth_required": true,
+      "request_shape": "?condition=string&start_date=string&end_date=string",
+      "response_shape": "{condition: string, avg_days_to_treatment: float, avg_days_to_followup: float, sample_size: int}",
+      "description": "Retrieve average treatment timelines (anonymized): time from diagnosis to treatment initiation, time to follow-up completion; aggregated by condition."
+    },
+    {
+      "method": "GET",
+      "path": "/api/admin/analytics/cohort-drill-down",
+      "handler": "admin-32",
+      "auth_required": true,
+      "request_shape": "?metric=string&cohort_id=string",
+      "response_shape": "{cohort_id: string, metric: string, breakdown: [{segment: string, value: float, record_count: int}], audit_trail: [{action: string, timestamp: string, user_id: string}]}",
+      "description": "Drill down from an aggregated metric to cohort-level breakdowns (anonymized); clicking further reveals individual records with full audit trail."
+    },
+    {
+      "method": "GET",
+      "path": "/api/admin/flags",
+      "handler": "admin-33",
+      "auth_required": true,
+      "request_shape": "?flag_type=string&severity=string&limit=int&offset=int",
+      "response_shape": "{flags: [{id: string, key: string, description: string, severity: string, affected_patient_count: int, created_at: string}], total: int}",
+      "description": "List all system-wide flags (duplicate medications, drug interactions, missed follow-ups) aggregated and anonymized; no individual patient names exposed."
+    },
+    {
+      "method": "GET",
+      "path": "/api/admin/drug-interactions",
+      "handler": "admin-34",
+      "auth_required": true,
+      "request_shape": "?drug_a=string&drug_b=string&severity=string&limit=int&offset=int",
+      "response_shape": "{interactions: [{id: string, drug_a_id: string, drug_b_id: string, drug_a_name: string, drug_b_name: string, interaction_type: string, severity: string, description: string}], total: int}",
+      "description": "List all known drug interaction pairs loaded from DDInter; queryable locally for offline conflict detection."
+    },
+    {
+      "method": "GET",
+      "path": "/api/admin/feature-flags",
+      "handler": "admin-35",
+      "auth_required": true,
+      "request_shape": "?environment=string&limit=int&offset=int",
+      "response_shape": "{flags: [{id: string, key: string, enabled: boolean, description: string, environment: string, updated_at: string}], total: int}",
+      "description": "List all feature flags (enabled/disabled) with environment and description; used to control feature rollout and A/B testing."
+    },
+    {
+      "method": "PATCH",
+      "path": "/api/admin/feature-flags/{id}",
+      "handler": "admin-36",
+      "auth_required": true,
+      "request_shape": "Partial<{enabled: boolean, description: string}>",
+      "response_shape": "{id: string, key: string, enabled: boolean, description: string, updated_at: string}",
+      "description": "Update a feature flag's enabled status and description; log the change for audit purposes."
+    },
+    {
+      "method": "POST",
+      "path": "/api/uploads",
+      "handler": "uploads-37",
+      "auth_required": true,
+      "request_shape": "FormData: {file: File}",
+      "response_shape": "{file_id: string, filename: string, size_bytes: int, mime_type: string, storage_path: string}",
+      "description": "Generic file upload endpoint for documents; returns file ID and storage path for subsequent processing."
+    },
+    {
+      "method": "POST",
+      "path": "/api/notifications/push",
+      "handler": "notifications-38",
+      "auth_required": true,
+      "request_shape": "{patient_id: string, title: string, message: string, notification_type: string}",
+      "response_shape": "{success: boolean, notification_id: string, sent_at: string}",
+      "description": "Send a push notification to a patient via ntfy.sh; used for medication reminders, appointment alerts, and follow-up due dates."
+    },
+    {
+      "method": "GET",
+      "path": "/api/geo/geocode",
+      "handler": "geo-39",
+      "auth_required": true,
+      "request_shape": "?address=string",
+      "response_shape": "{address: string, latitude: float, longitude: float}",
+      "description": "Geocode an address to latitude/longitude using Leaflet; used for facility locator."
+    },
+    {
+      "method": "GET",
+      "path": "/api/geo/route",
+      "handler": "geo-40",
+      "auth_required": true,
+      "request_shape": "?start_lat=float&start_lon=float&end_lat=float&end_lon=float",
+      "response_shape": "{distance_km: float, duration_minutes: int, route: [{latitude: float, longitude: float}]}",
+      "description": "Calculate route between two coordinates using Leaflet; returns distance and estimated travel time."
+    },
+    {
+      "method": "POST",
+      "path": "/api/webhooks/openai",
+      "handler": "webhooks-41",
+      "auth_required": false,
+      "request_shape": "{document_id: string, extraction_result: object, status: string}",
+      "response_shape": "{success: boolean, processed_facts: int}",
+      "description": "Inbound webhook receiver for OpenAI async extraction results; processes completed document extractions and updates fact store."
+    },
+    {
+      "method": "POST",
+      "path": "/api/webhooks/bhashini",
+      "handler": "webhooks-42",
+      "auth_required": false,
+      "request_shape": "{term_id: string, language: string, translation: string}",
+      "response_shape": "{success: boolean}",
+      "description": "Inbound webhook receiver for Bhashini translation results; updates multilingual explanations for medical terms."
+    },
+    {
+      "method": "POST",
+      "path": "/api/webhooks/ntfy",
+      "handler": "webhooks-43",
+      "auth_required": false,
+      "request_shape": "{notification_id: string, status: string, delivered_at: string}",
+      "response_shape": "{success: boolean}",
+      "description": "Inbound webhook receiver for ntfy.sh push notification delivery status; logs notification events."
+    },
+    {
+      "method": "POST",
+      "path": "/api/webhooks/leaflet",
+      "handler": "webhooks-44",
+      "auth_required": false,
+      "request_shape": "{query_id: string, result_type: string, data: object}",
+      "response_shape": "{success: boolean}",
+      "description": "Inbound webhook receiver for Leaflet geocoding and routing results; updates facility locator cache."
+    },
+    {
+      "method": "POST",
+      "path": "/api/webhooks/overpass",
+      "handler": "webhooks-45",
+      "auth_required": false,
+      "request_shape": "{query_id: string, facilities: object[]}",
+      "response_shape": "{success: boolean, facilities_indexed: int}",
+      "description": "Inbound webhook receiver for Overpass API facility query results; updates nearby pharmacies, labs, and emergency facilities."
+    },
+    {
+      "method": "POST",
+      "path": "/api/webhooks/synthea",
+      "handler": "webhooks-46",
+      "auth_required": false,
+      "request_shape": "{batch_id: string, patient_count: int, documents: object[]}",
+      "response_shape": "{success: boolean, patients_created: int, documents_created: int}",
+      "description": "Inbound webhook receiver for Synthea synthetic patient data; seeds the database with demo patients and documents."
+    },
+    {
+      "method": "POST",
+      "path": "/api/webhooks/rxnorm",
+      "handler": "webhooks-47",
+      "auth_required": false,
+      "request_shape": "{medication_id: string, drug_name: string, rxcui: string}",
+      "response_shape": "{success: boolean}",
+      "description": "Inbound webhook receiver for RxNorm drug normalization results; updates medication records with normalized RxCUI."
+    },
+    {
+      "method": "POST",
+      "path": "/api/webhooks/ddinter",
+      "handler": "webhooks-48",
+      "auth_required": false,
+      "request_shape": "{interaction_pairs: object[]}",
+      "response_shape": "{success: boolean, interactions_indexed: int}",
+      "description": "Inbound webhook receiver for DDInter drug interaction data; updates the local interaction table for offline conflict detection."
+    },
+    {
+      "method": "POST",
+      "path": "/api/webhooks/openfda",
+      "handler": "webhooks-49",
+      "auth_required": false,
+      "request_shape": "{drug_name: string, adverse_events: object[]}",
+      "response_shape": "{success: boolean, events_indexed: int}",
+      "description": "Inbound webhook receiver for openFDA adverse event data; enriches medication safety information."
+    }
+  ]
+}
